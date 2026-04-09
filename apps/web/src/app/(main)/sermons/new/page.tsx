@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 
@@ -24,7 +24,15 @@ const AUDIENCES = [
   { value: 'ADULT', label: '장년' },
 ];
 
-export default function NewSermonPage() {
+export default function NewSermonPageWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><p className="text-gray-500">로딩 중...</p></div>}>
+      <NewSermonPage />
+    </Suspense>
+  );
+}
+
+function NewSermonPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
