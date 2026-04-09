@@ -1,0 +1,17 @@
+{
+  "name": "malssam",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel -r run dev",
+    "dev:web": "pnpm --filter @malssam/web dev",
+    "dev:api": "pnpm --filter @malssam/api start:dev",
+    "build": "pnpm --parallel -r run build",
+    "lint": "pnpm --parallel -r run lint",
+    "db:migrate": "pnpm --filter @malssam/api prisma:migrate",
+    "db:generate": "pnpm --filter @malssam/api prisma:generate",
+    "db:studio": "pnpm --filter @malssam/api prisma:studio"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: malssam-db
+    environment:
+      POSTGRES_USER: malssam
+      POSTGRES_PASSWORD: malssam123
+      POSTGRES_DB: malssam
+    ports:
+      - '5432:5432'
+    volumes:
+      - malssam_pgdata:/var/lib/postgresql/data
+
+volumes:
+  malssam_pgdata:
