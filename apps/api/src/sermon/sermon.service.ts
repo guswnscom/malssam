@@ -89,6 +89,7 @@ export class SermonService {
         data: {
           sermonRequestId: request.id, title: output.title,
           scripture: output.scripture || dto.scripture,
+          scriptureText: output.scriptureText || null,
           summary: output.summary || '', introduction: output.introduction,
           outline: output.outline as any, application: output.application,
           conclusion: output.conclusion,
@@ -254,6 +255,13 @@ export class SermonService {
     <div class="scripture">${escHtml(draft.scripture)}</div>
     <div class="date">${escHtml(dateStr)}</div>
   </div>
+
+  ${draft.scriptureText ? `
+  <div class="section" style="background: #f0f4ff; border-left: 4px solid #2563eb; padding: 16px 20px; border-radius: 0 8px 8px 0; margin-bottom: 20px;">
+    <div class="section-label" style="color: #2563eb;">성경 원문</div>
+    <div class="section-content" style="font-style: italic; font-size: 12px; line-height: 2;">${escHtml(draft.scriptureText)}</div>
+  </div>
+  ` : ''}
 
   <div class="summary">${escHtml(draft.summary)}</div>
 
@@ -509,6 +517,7 @@ export class SermonService {
     return {
       id: draft.id, sermonRequestId: request.id,
       title: draft.title, scripture: draft.scripture,
+      scriptureText: draft.scriptureText || null,
       summary: draft.summary, introduction: draft.introduction,
       outline: draft.outline, application: draft.application,
       conclusion: draft.conclusion,

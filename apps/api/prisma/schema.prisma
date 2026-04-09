@@ -107,6 +107,7 @@ model SermonDraft {
   sermonRequestId   String        @unique @map("sermon_request_id") @db.Uuid
   title             String        @db.VarChar(200)
   scripture         String        @db.VarChar(100)
+  scriptureText     String?       @map("scripture_text") @db.Text
   summary           String        @db.Text
   introduction      String        @db.Text
   outline           Json

@@ -7,10 +7,11 @@ import { api } from '@/lib/api';
 interface OutlinePoint { point: number; title: string; content: string; }
 interface Citation { id: string; type: string; author: string; title: string; }
 interface SermonData {
-  id: string; title: string; scripture: string; summary: string;
-  introduction: string; outline: OutlinePoint[]; application: string;
-  conclusion: string; citations: Citation[]; worshipType: string;
-  targetDate: string; regenerationCount: number; createdAt: string; updatedAt: string;
+  id: string; title: string; scripture: string; scriptureText?: string | null;
+  summary: string; introduction: string; outline: OutlinePoint[];
+  application: string; conclusion: string; citations: Citation[];
+  worshipType: string; targetDate: string; regenerationCount: number;
+  createdAt: string; updatedAt: string;
 }
 
 const WORSHIP_LABEL: Record<string, string> = {
@@ -219,9 +220,15 @@ export default function SermonDetailPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="text-blue-600 font-semibold text-sm">📖 {sermon.scripture}</span>
           </div>
-          <p className="text-sm text-gray-600 italic leading-relaxed">
-            본 설교는 위 성경 본문을 기반으로 작성되었습니다. 반드시 성경 원문을 함께 참고해주세요.
-          </p>
+          {sermon.scriptureText ? (
+            <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line border-l-4 border-blue-300 pl-3 mt-2">
+              {sermon.scriptureText}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 italic leading-relaxed">
+              성경 원문은 새로 생성한 설교에서 표시됩니다.
+            </p>
+          )}
         </div>
 
         {/* 제목 (편집 가능) */}
