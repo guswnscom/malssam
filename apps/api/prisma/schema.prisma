@@ -194,3 +194,29 @@ model ChurchEvent {
   @@index([churchId, date])
   @@map("church_events")
 }
+
+model UsageLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  churchId  String?  @map("church_id") @db.Uuid
+  action    String   @db.VarChar(50)
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([action])
+  @@map("usage_logs")
+}
+
+model Feedback {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  churchId  String?  @map("church_id") @db.Uuid
+  category  String   @db.VarChar(30)
+  rating    String   @db.VarChar(10)
+  comment   String?  @db.Text
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  @@index([userId])
+  @@index([category])
+  @@map("feedbacks")
+}

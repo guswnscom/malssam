@@ -7,6 +7,7 @@ import { ChurchModule } from './church/church.module';
 import { SermonModule } from './sermon/sermon.module';
 import { BillingModule } from './billing/billing.module';
 import { CalendarModule } from './calendar/calendar.module';
+import { FeedbackModule } from './feedback/feedback.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { CalendarModule } from './calendar/calendar.module';
     SermonModule,
     BillingModule,
     CalendarModule,
+    FeedbackModule,
   ],
 })
 export class AppModule {}

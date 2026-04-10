@@ -36,6 +36,10 @@ export default function SermonDetailPage() {
   const [reviewResult, setReviewResult] = useState<{ before: SermonData; after: SermonData; changes: string[] } | null>(null);
   const [reviewSec, setReviewSec] = useState(0);
   const [enrichSec, setEnrichSec] = useState(0);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState('');
+  const [feedbackText, setFeedbackText] = useState('');
+  const [feedbackSent, setFeedbackSent] = useState(false);
 
   const sid = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
 
@@ -199,6 +203,7 @@ ${sermon.conclusion}
     a.href = URL.createObjectURL(blob);
     a.download = `PPT_프롬프트_${sermon.title}.txt`;
     a.click();
+    logUsage('ppt_download', { sermonId: sermon.id, worshipType: sermon.worshipType });
   };
 
   const handlePdf = () => {
@@ -207,15 +212,32 @@ ${sermon.conclusion}
   };
 
   const handleExportPdf = async () => {
-    // PDF를 다운로드 가능한 형태로 저장
     const t = localStorage.getItem('accessToken');
     const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'}/sermons/${sermon.id}/pdf?token=${t}`;
-    // 새 창에서 열어서 인쇄/저장 가능하게
     const w = window.open(url, '_blank');
     if (w) {
-      // 페이지 로드 후 인쇄 다이얼로그 자동 실행 (PDF 저장 가능)
       setTimeout(() => { try { w.print(); } catch {} }, 2000);
     }
+    logUsage('pdf_view', { sermonId: sermon.id });
+  };
+
+  // 사용 로그 기록
+  const logUsage = (action: string, metadata?: any) => {
+    api.post('/feedback/log', { action, metadata }).catch(() => {});
+  };
+
+  const handleSermonFeedback = async () => {
+    if (!feedbackRating) return;
+    try {
+      await api.post('/feedback', {
+        category: 'sermon',
+        rating: feedbackRating,
+        comment: feedbackText || null,
+        metadata: { sermonId: sermon.id, worshipType: sermon.worshipType },
+      });
+      setFeedbackSent(true);
+      setTimeout(() => { setFeedbackOpen(false); setFeedbackSent(false); setFeedbackRating(''); setFeedbackText(''); }, 2000);
+    } catch {}
   };
 
   const handleShare = async () => {
@@ -469,6 +491,55 @@ ${sermon.conclusion}
                 ✓ 수정 후 버전 유지
               </button>
             </div>
+          </div>
+        )}
+
+        {/* 설교 피드백 */}
+        {!feedbackOpen && !feedbackSent && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 mb-4">
+            <p className="text-sm font-medium text-gray-700 mb-3">이 설교문 어떠셨나요?</p>
+            <div className="flex gap-2">
+              <button onClick={() => { setFeedbackRating('good'); setFeedbackOpen(true); }}
+                className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#059669] to-[#047857] text-white shadow-md">👍 괜찮아요</button>
+              <button onClick={() => { setFeedbackRating('neutral'); setFeedbackOpen(true); }}
+                className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white shadow-md">🔄 개선 필요</button>
+              <button onClick={() => { setFeedbackRating('bad'); setFeedbackOpen(true); }}
+                className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-[#0F1A2E] text-[#C9A84C] shadow-md">📝 의견 남기기</button>
+            </div>
+          </div>
+        )}
+
+        {/* 피드백 입력 모달 */}
+        {feedbackOpen && (
+          <div className="bg-white rounded-2xl border border-[#C9A84C]/20 shadow-sm p-5 mb-4">
+            {feedbackSent ? (
+              <div className="text-center py-3">
+                <p className="text-lg font-bold text-[#0F1A2E]">감사합니다! 🙏</p>
+                <p className="text-sm text-gray-500 mt-1">소중한 의견이 제품 개선에 반영됩니다</p>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-gray-700 mb-3">추가 의견을 남겨주세요</p>
+                <div className="flex gap-2 mb-3">
+                  {[
+                    { val: 'good', emoji: '👍', label: '만족' },
+                    { val: 'neutral', emoji: '😐', label: '보통' },
+                    { val: 'bad', emoji: '👎', label: '불만족' },
+                  ].map(r => (
+                    <button key={r.val} onClick={() => setFeedbackRating(r.val)}
+                      className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${feedbackRating === r.val ? 'bg-[#0F1A2E] text-[#C9A84C]' : 'bg-gray-100 text-gray-600'}`}>
+                      {r.emoji} {r.label}
+                    </button>
+                  ))}
+                </div>
+                <textarea className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#C9A84C]/30 focus:border-[#C9A84C] outline-none text-sm resize-none" rows={3} maxLength={500}
+                  placeholder="실제 설교에 사용 가능하셨나요? 어떤 부분이 좋았나요?" value={feedbackText} onChange={e => setFeedbackText(e.target.value)} />
+                <div className="flex gap-2 mt-3">
+                  <button onClick={() => { setFeedbackOpen(false); setFeedbackRating(''); }} className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-700">취소</button>
+                  <button onClick={handleSermonFeedback} className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-[#C9A84C] text-[#0F1A2E]">보내기</button>
+                </div>
+              </>
+            )}
           </div>
         )}
 

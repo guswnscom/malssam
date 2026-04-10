@@ -1,166 +1,142 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 
-interface BillingStatus {
-  plan: string;
-  status: string;
-  trialEnd: string;
-  trialDaysLeft: number;
-  monthlyPrice: number | null;
-  cardLastFour: string | null;
-  nextBillingDate: string | null;
-}
-
-const PLAN_INFO: Record<string, { label: string; price: string; features: string[] }> = {
-  SEED: { label: '새싹', price: '월 5만원', features: ['목회자 3명', '설교 생성 월 20회', 'PDF 출력'] },
-  GROWTH: { label: '성장', price: '월 10만원', features: ['목회자 5명', '설교 생성 월 50회', 'PDF 출력'] },
-  FRUIT: { label: '열매', price: '월 18만원', features: ['목회자 10명', '설교 생성 무제한', 'PDF 출력'] },
-};
-
-const STATUS_LABEL: Record<string, { text: string; color: string }> = {
-  trial: { text: '무료체험 중', color: 'bg-blue-100 text-blue-700' },
-  active: { text: '구독 중', color: 'bg-green-100 text-green-700' },
-  expired: { text: '만료됨', color: 'bg-red-100 text-red-700' },
-  suspended: { text: '일시정지', color: 'bg-yellow-100 text-yellow-700' },
-};
+const PLANS = [
+  { key: 'FREE', label: '무료', price: '0원', desc: '5편', features: ['설교 생성 5편', 'PDF 출력', '설교 분석'], color: 'border-gray-200', badge: '' },
+  { key: 'SEED', label: '새싹', price: '5만원', desc: '5편', features: ['설교 생성 5편', 'PDF 출력', '설교 분석', 'PPT 프롬프트'], color: 'border-[#C9A84C]/40', badge: '' },
+  { key: 'GROWTH', label: '성장', price: '10만원', desc: '10편', features: ['설교 생성 10편', 'PDF 출력', '설교 분석', 'PPT 프롬프트', 'AI 최종검토'], color: 'border-[#3B82F6]/40', badge: '추천' },
+  { key: 'STANDARD', label: '표준', price: '20만원', desc: '20편', features: ['설교 생성 20편', 'PDF 출력', '설교 분석', 'PPT 프롬프트', 'AI 최종검토', '우선 지원'], color: 'border-[#8B5CF6]/40', badge: '' },
+];
 
 export default function BillingPage() {
   const router = useRouter();
-  const [billing, setBilling] = useState<BillingStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activating, setActivating] = useState(false);
-  const [error, setError] = useState('');
+  const [feedbackPlan, setFeedbackPlan] = useState('');
+  const [feedbackText, setFeedbackText] = useState('');
+  const [feedbackRating, setFeedbackRating] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  useEffect(() => {
-    api.get('/billing/status')
-      .then(({ data }) => setBilling(data))
-      .catch((err) => setError(err.response?.data?.message || '결제 정보를 불러올 수 없습니다'))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const handleActivate = async () => {
-    if (!confirm('구독을 시작하시겠습니까?\n(테스트 모드: 실제 결제 없이 즉시 활성화됩니다)')) return;
-    setActivating(true);
+  const handleFeedback = async () => {
+    if (!feedbackRating) { alert('만족도를 선택해주세요'); return; }
+    setSubmitting(true);
     try {
-      const { data } = await api.post('/billing/activate');
-      setBilling((prev) => prev ? { ...prev, ...data } : prev);
-      alert('구독이 시작되었습니다!');
-    } catch (err: any) {
-      alert(err.response?.data?.message || '구독 시작에 실패했습니다');
-    } finally {
-      setActivating(false);
-    }
+      await api.post('/feedback', {
+        category: 'pricing',
+        rating: feedbackRating,
+        comment: feedbackText || null,
+        metadata: { plan: feedbackPlan },
+      });
+      setSubmitted(true);
+      setTimeout(() => { setFeedbackPlan(''); setSubmitted(false); setFeedbackText(''); setFeedbackRating(''); }, 2000);
+    } catch { alert('피드백 전송에 실패했습니다'); }
+    finally { setSubmitting(false); }
   };
 
-  if (loading) return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><p className="text-gray-500">로딩 중...</p></div>;
-
-  if (error) return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
-      <p className="text-red-500 mb-4">{error}</p>
-      <button onClick={() => router.push('/home')} className="text-blue-600 hover:underline">홈으로</button>
-    </div>
-  );
-
-  if (!billing) return null;
-
-  const planInfo = PLAN_INFO[billing.plan] || PLAN_INFO.SEED;
-  const statusInfo = STATUS_LABEL[billing.status] || STATUS_LABEL.trial;
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <button onClick={() => router.push('/home')} className="text-gray-500 hover:text-gray-700">← 홈</button>
-          <h1 className="text-lg font-semibold">결제 관리</h1>
+    <div className="min-h-screen">
+      <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 50% 30%, #C9A84C 0%, transparent 50%)' }} />
+        <div className="max-w-3xl mx-auto flex items-center justify-between relative">
+          <button onClick={() => router.push('/home')} className="text-[#8B9DC3] hover:text-white text-sm">← 홈</button>
+          <h1 className="text-lg font-semibold text-white">요금제 안내</h1>
           <div className="w-12" />
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* 현재 상태 */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">구독 상태</h2>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color}`}>
-              {statusInfo.text}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-500">요금제:</span>
-              <span className="ml-2 font-semibold">{planInfo.label}</span>
-            </div>
-            <div>
-              <span className="text-gray-500">가격:</span>
-              <span className="ml-2 font-semibold">{planInfo.price}</span>
-            </div>
-            {billing.status === 'trial' && (
-              <>
-                <div>
-                  <span className="text-gray-500">체험 종료:</span>
-                  <span className="ml-2 font-medium">{new Date(billing.trialEnd).toLocaleDateString('ko-KR')}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">남은 일수:</span>
-                  <span className="ml-2 font-bold text-blue-600">D-{billing.trialDaysLeft}</span>
-                </div>
-              </>
-            )}
-            {billing.status === 'active' && (
-              <>
-                <div>
-                  <span className="text-gray-500">결제 카드:</span>
-                  <span className="ml-2 font-medium">**** {billing.cardLastFour}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">다음 결제:</span>
-                  <span className="ml-2 font-medium">
-                    {billing.nextBillingDate ? new Date(billing.nextBillingDate).toLocaleDateString('ko-KR') : '-'}
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* 만료 경고 */}
-          {billing.status === 'expired' && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-700 text-sm font-medium">무료체험이 종료되었습니다.</p>
-              <p className="text-red-600 text-sm mt-1">설교 생성 기능이 제한됩니다. 구독을 시작해주세요.</p>
-            </div>
-          )}
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {/* 베타 안내 */}
+        <div className="bg-gradient-to-r from-[#0F1A2E] to-[#1B2D4A] rounded-2xl p-5 text-center">
+          <span className="inline-block bg-[#C9A84C] text-[#0F1A2E] text-xs font-bold px-3 py-1 rounded-full mb-3">BETA</span>
+          <h2 className="text-white font-bold text-lg mb-1">현재 베타 테스트 기간입니다</h2>
+          <p className="text-[#8B9DC3] text-sm">모든 기능을 무료로 사용하실 수 있습니다. 아래 요금제에 대한 의견을 남겨주세요.</p>
         </div>
 
         {/* 요금제 카드 */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5 sm:p-6">
-          <h2 className="text-lg font-semibold mb-4">현재 요금제: {planInfo.label}</h2>
-          <ul className="space-y-2">
-            {planInfo.features.map((f, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
-                <span className="text-green-500">✓</span> {f}
-              </li>
-            ))}
-          </ul>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {PLANS.map(plan => (
+            <div key={plan.key} className={`bg-white rounded-2xl border-2 ${plan.color} p-5 relative`}>
+              {plan.badge && (
+                <span className="absolute -top-2.5 right-4 bg-[#3B82F6] text-white text-xs font-bold px-3 py-0.5 rounded-full">{plan.badge}</span>
+              )}
+              <h3 className="font-bold text-lg text-[#0F1A2E]">{plan.label}</h3>
+              <div className="flex items-baseline gap-1 mt-1 mb-3">
+                <span className="text-2xl font-bold text-[#0F1A2E]">{plan.price}</span>
+                {plan.key !== 'FREE' && <span className="text-xs text-gray-400">/ {plan.desc}</span>}
+              </div>
+              <ul className="space-y-1.5 mb-4">
+                {plan.features.map((f, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                    <svg className="w-4 h-4 text-[#C9A84C] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => { setFeedbackPlan(plan.key); setSubmitted(false); setFeedbackText(''); setFeedbackRating(''); }}
+                className="w-full py-2.5 rounded-xl text-sm font-bold bg-[#0F1A2E] text-[#C9A84C] hover:bg-[#1B2D4A] transition-colors"
+              >
+                이 요금제 어떠신가요?
+              </button>
+            </div>
+          ))}
         </div>
 
-        {/* 결제 버튼 */}
-        {(billing.status === 'trial' || billing.status === 'expired') && (
-          <button
-            onClick={handleActivate}
-            disabled={activating}
-            className="w-full bg-blue-600 text-white py-4 rounded-xl text-lg font-semibold hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
-          >
-            {activating ? '처리 중...' : billing.status === 'expired' ? '구독 시작하기' : '지금 구독 시작하기 (체험 후 자동 전환)'}
-          </button>
-        )}
+        {/* 피드백 모달 */}
+        {feedbackPlan && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+              {submitted ? (
+                <div className="text-center py-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-[#059669] to-[#047857] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <h3 className="font-bold text-lg text-gray-900">감사합니다!</h3>
+                  <p className="text-sm text-gray-500 mt-1">소중한 의견이 제품 개선에 반영됩니다</p>
+                </div>
+              ) : (
+                <>
+                  <h3 className="font-bold text-lg text-[#0F1A2E] mb-1">
+                    {PLANS.find(p => p.key === feedbackPlan)?.label} 요금제 의견
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-4">이 요금제에 대해 어떻게 생각하시나요?</p>
 
-        {billing.status === 'active' && (
-          <div className="text-center text-sm text-gray-500">
-            구독이 활성화되어 있습니다. 모든 기능을 사용할 수 있습니다.
+                  <div className="flex gap-3 mb-4">
+                    {[
+                      { val: 'good', emoji: '👍', label: '적절해요' },
+                      { val: 'neutral', emoji: '😐', label: '보통이에요' },
+                      { val: 'bad', emoji: '👎', label: '비싸요' },
+                    ].map(r => (
+                      <button key={r.val} onClick={() => setFeedbackRating(r.val)}
+                        className={`flex-1 py-3 rounded-xl text-center transition-all ${feedbackRating === r.val ? 'bg-[#0F1A2E] text-white shadow-lg' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                        <div className="text-2xl mb-1">{r.emoji}</div>
+                        <div className="text-xs font-medium">{r.label}</div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <textarea
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#C9A84C]/30 focus:border-[#C9A84C] outline-none text-sm resize-none"
+                    rows={3} maxLength={500}
+                    placeholder="추가 의견이 있으시면 자유롭게 남겨주세요 (선택)"
+                    value={feedbackText} onChange={e => setFeedbackText(e.target.value)}
+                  />
+
+                  <div className="flex gap-2 mt-4">
+                    <button onClick={() => setFeedbackPlan('')}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">
+                      취소
+                    </button>
+                    <button onClick={handleFeedback} disabled={submitting || !feedbackRating}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-[#C9A84C] text-[#0F1A2E] hover:bg-[#D4B85C] disabled:bg-gray-300">
+                      {submitting ? '전송 중...' : '의견 보내기'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         )}
       </main>

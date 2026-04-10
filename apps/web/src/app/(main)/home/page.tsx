@@ -63,6 +63,7 @@ export default function HomePage() {
   const { user } = useAuthStore();
   const [churchData, setChurchData] = useState<ChurchData | null>(null);
   const [recentSermons, setRecentSermons] = useState<SermonItem[]>([]);
+  const [usageStats, setUsageStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -74,12 +75,14 @@ export default function HomePage() {
         const meRes = await api.get('/auth/me');
         if (!meRes.data.churchId) { router.push('/onboarding/church'); return; }
 
-        const [churchRes, sermonsRes] = await Promise.all([
+        const [churchRes, sermonsRes, statsRes] = await Promise.all([
           api.get('/churches/me'),
           api.get('/sermons').catch(() => ({ data: [] })),
+          api.get('/feedback/stats').catch(() => ({ data: null })),
         ]);
         setChurchData(churchRes.data);
         setRecentSermons(sermonsRes.data.slice(0, 5));
+        setUsageStats(statsRes.data);
       } catch {
         router.push('/login');
       } finally {
@@ -141,16 +144,9 @@ export default function HomePage() {
             </p>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
-            {subscription.status === 'trial' && (
-              <span className="bg-[#C9A84C]/20 text-[#C9A84C] px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border border-[#C9A84C]/30">
-                무료체험 D-{subscription.trialDaysLeft}
-              </span>
-            )}
-            {subscription.status === 'active' && (
-              <span className="bg-green-900/30 text-green-300 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border border-green-500/30">
-                구독 중
-              </span>
-            )}
+            <span className="bg-[#C9A84C]/20 text-[#C9A84C] px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold border border-[#C9A84C]/30">
+              BETA
+            </span>
             <button onClick={handleLogout} className="text-xs sm:text-sm text-[#5A6F8C] hover:text-white">
               로그아웃
             </button>
@@ -160,18 +156,11 @@ export default function HomePage() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
 
-        {/* 구독 만료 경고 */}
-        {subscription.status === 'expired' && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-            <p className="text-red-700 font-medium">무료체험이 종료되었습니다</p>
-            <p className="text-red-600 text-sm mt-1">설교 생성이 제한됩니다.</p>
-            {membership.role === 'CHURCH_ADMIN' && (
-              <button onClick={() => router.push('/billing')} className="mt-2 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700">
-                구독 시작하기
-              </button>
-            )}
-          </div>
-        )}
+        {/* 베타 테스트 안내 */}
+        <div className="bg-gradient-to-r from-[#0F1A2E] to-[#1B2D4A] rounded-2xl p-4 flex items-center gap-3">
+          <span className="bg-[#C9A84C] text-[#0F1A2E] text-[10px] font-bold px-2.5 py-0.5 rounded-full flex-shrink-0">BETA</span>
+          <p className="text-sm text-[#8B9DC3]">현재 모든 기능이 <span className="text-[#C9A84C] font-semibold">무료</span>로 제공되고 있습니다. 사용 후 피드백을 남겨주시면 제품 개선에 큰 도움이 됩니다.</p>
+        </div>
 
         {/* 절기/이벤트 알림 */}
         {upcomingEvents.length > 0 && (
@@ -361,6 +350,31 @@ export default function HomePage() {
             )}
           </div>
         </section>
+
+        {/* 나의 활동 */}
+        {usageStats && (
+          <section>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2"><span className="w-1 h-4 bg-[#0F1A2E] rounded-full" />나의 활동</h2>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
+                <p className="text-2xl font-bold text-[#0F1A2E]">{usageStats.weekly?.sermon_generate || 0}</p>
+                <p className="text-xs text-gray-500 mt-1">이번 주 설교 생성</p>
+              </div>
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
+                <p className="text-2xl font-bold text-[#C9A84C]">{usageStats.monthly?.sermon_generate || 0}</p>
+                <p className="text-xs text-gray-500 mt-1">이번 달 설교 생성</p>
+              </div>
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
+                <p className="text-2xl font-bold text-[#3B82F6]">
+                  {usageStats.topFeature ? (
+                    {sermon_generate: '설교 생성', sermon_regenerate: 'AI 수정', ppt_download: 'PPT', pdf_view: 'PDF', sermon_analyze: '설교 분석'}[usageStats.topFeature.action as string] || usageStats.topFeature.action
+                  ) : '-'}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">가장 많이 쓴 기능</p>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* 교회 정보 */}
         <section>
