@@ -417,14 +417,16 @@ ${sermon.conclusion}
 
         {/* 액션 버튼 */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 mb-4">
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-3">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-3">
             <button onClick={handleSave} disabled={saving} className="py-2.5 rounded-xl text-sm font-bold bg-[#0F1A2E] text-white hover:bg-[#1B2D4A] disabled:bg-gray-300 shadow-md shadow-[#0F1A2E]/20">
               {saving ? '저장중...' : '💾 저장'}
             </button>
             <button onClick={handlePptPrompt} className="py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#C9A84C] to-[#A8893A] text-white hover:from-[#D4B85C] hover:to-[#B8994A] shadow-md shadow-[#C9A84C]/20" title="Gemini/GPT에서 PPT를 만드세요">PPT 프롬프트</button>
-            <button onClick={handlePdf} className="py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#3B82F6] to-[#2563EB] text-white hover:from-[#60A5FA] hover:to-[#3B82F6] shadow-md shadow-[#3B82F6]/20">PDF 보기</button>
-            <button onClick={handleExportPdf} className="py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#059669] to-[#047857] text-white hover:from-[#10B981] hover:to-[#059669] shadow-md shadow-[#059669]/20">📥 저장</button>
-            <button onClick={handleShare} className="py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white hover:from-[#8B5CF6] hover:to-[#7C3AED] shadow-md shadow-[#7C3AED]/20">📤 공유</button>
+            <button onClick={handleExportPdf} className="py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#3B82F6] to-[#2563EB] text-white hover:from-[#60A5FA] hover:to-[#3B82F6] shadow-md shadow-[#3B82F6]/20">📄 PDF 저장 및 보기</button>
+            <button onClick={handleShare} className="py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white hover:from-[#8B5CF6] hover:to-[#7C3AED] shadow-md shadow-[#7C3AED]/20 flex items-center justify-center gap-1.5">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0-12.814a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0 12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
+              공유
+            </button>
             <button onClick={() => setShowDelete(true)} className="py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#EF4444] to-[#DC2626] text-white hover:from-[#F87171] hover:to-[#EF4444] shadow-md shadow-[#EF4444]/20">삭제</button>
           </div>
           {regenLoading ? (
