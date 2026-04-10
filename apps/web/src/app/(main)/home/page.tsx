@@ -146,7 +146,10 @@ export default function HomePage() {
 
         {/* 절기/이벤트 알림 */}
         {upcomingEvents.length > 0 && (
-          <div className="bg-[#FFF8E7] border border-[#C9A84C]/20 rounded-2xl p-5">
+          <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/20">
+            {/* 배경 이미지 */}
+            <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=800&q=60)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+            <div className="relative bg-[#FFF8E7]/90 p-5">
             <h3 className="text-sm font-semibold text-[#8B6914] mb-3 flex items-center gap-2">
               <span className="w-1 h-4 bg-[#C9A84C] rounded-full" />다가오는 교회 일정
             </h3>
@@ -168,8 +171,8 @@ export default function HomePage() {
                 </button>
               ))}
             </div>
-            <p className="text-xs text-amber-600 mt-2">클릭하면 해당 절기에 맞는 설교를 바로 준비할 수 있어요</p>
-          </div>
+            <p className="text-xs text-[#8B6914]/60 mt-3">클릭하면 해당 절기에 맞는 설교를 바로 준비할 수 있습니다</p>
+          </div></div>
         )}
 
         {/* 이번주 예배 */}
@@ -187,18 +190,23 @@ export default function HomePage() {
               const isToday = todayDay === worshipDay;
 
               let statusMsg = '';
-              let statusColor = 'text-gray-500';
+              let statusColor = 'text-gray-400';
+              let statusIcon = '';
               if (matchingSermon) {
-                statusMsg = '✅ 작성됨';
-                statusColor = 'text-green-600';
+                statusMsg = '준비 완료';
+                statusColor = 'text-[#0F1A2E]';
+                statusIcon = '✓';
               } else if (isToday) {
-                statusMsg = `목사님, 오늘 ${WORSHIP_LABEL[type]}가 있습니다. 설교를 준비해주세요!`;
-                statusColor = 'text-red-500 font-medium';
+                statusMsg = '오늘 예배 — 설교 준비가 필요합니다';
+                statusColor = 'text-[#C9A84C] font-medium';
+                statusIcon = '⏰';
               } else if (isPast) {
-                statusMsg = `돌아오는 ${WORSHIP_LABEL[type]} 설교 작성이 필요합니다`;
-                statusColor = 'text-amber-600';
+                statusMsg = '다음 예배를 위해 미리 준비하세요';
+                statusColor = 'text-gray-500';
+                statusIcon = '→';
               } else {
-                statusMsg = '미작성';
+                statusMsg = '아직 준비되지 않았습니다';
+                statusIcon = '○';
               }
 
               return (
@@ -206,7 +214,7 @@ export default function HomePage() {
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900">{WORSHIP_LABEL[type] || type}</h3>
-                      <p className={`text-xs sm:text-sm mt-1 ${statusColor}`}>{statusMsg}</p>
+                      <p className={`text-xs sm:text-sm mt-1 ${statusColor}`}>{statusIcon} {statusMsg}</p>
                     </div>
                     {matchingSermon ? (
                       <button
@@ -276,26 +284,36 @@ export default function HomePage() {
         <section>
           <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2"><span className="w-1 h-4 bg-[#0F1A2E] rounded-full" />빠른 작업</h2>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            <button onClick={() => router.push('/sermons/new')} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all">
-              <div className="w-10 h-10 bg-[#FFF8E7] rounded-xl flex items-center justify-center mx-auto mb-2"><span className="text-lg">✍️</span></div>
-              <span className="text-xs font-medium text-gray-700">새 설교</span>
+            <button onClick={() => router.push('/sermons/new')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all group">
+              <div className="w-12 h-12 bg-[#0F1A2E] rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-[#C9A84C] transition-colors">
+                <svg className="w-5 h-5 text-[#C9A84C] group-hover:text-[#0F1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+              </div>
+              <span className="text-xs font-semibold text-gray-700">새 설교</span>
             </button>
-            <button onClick={() => router.push('/sermons')} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all">
-              <div className="w-10 h-10 bg-[#EFF6FF] rounded-xl flex items-center justify-center mx-auto mb-2"><span className="text-lg">📋</span></div>
-              <span className="text-xs font-medium text-gray-700">설교 목록</span>
+            <button onClick={() => router.push('/sermons')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all group">
+              <div className="w-12 h-12 bg-[#0F1A2E] rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-[#C9A84C] transition-colors">
+                <svg className="w-5 h-5 text-[#C9A84C] group-hover:text-[#0F1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              </div>
+              <span className="text-xs font-semibold text-gray-700">설교 목록</span>
             </button>
-            <button onClick={() => router.push('/sermons/analyze')} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all">
-              <div className="w-10 h-10 bg-[#F0FDF4] rounded-xl flex items-center justify-center mx-auto mb-2"><span className="text-lg">🔍</span></div>
-              <span className="text-xs font-medium text-gray-700">설교 분석</span>
+            <button onClick={() => router.push('/sermons/analyze')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all group">
+              <div className="w-12 h-12 bg-[#0F1A2E] rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-[#C9A84C] transition-colors">
+                <svg className="w-5 h-5 text-[#C9A84C] group-hover:text-[#0F1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+              </div>
+              <span className="text-xs font-semibold text-gray-700">설교 분석</span>
             </button>
-            <button onClick={() => router.push('/calendar')} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all">
-              <div className="w-10 h-10 bg-[#FDF2F8] rounded-xl flex items-center justify-center mx-auto mb-2"><span className="text-lg">📅</span></div>
-              <span className="text-xs font-medium text-gray-700">캘린더</span>
+            <button onClick={() => router.push('/calendar')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all group">
+              <div className="w-12 h-12 bg-[#0F1A2E] rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-[#C9A84C] transition-colors">
+                <svg className="w-5 h-5 text-[#C9A84C] group-hover:text-[#0F1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              </div>
+              <span className="text-xs font-semibold text-gray-700">캘린더</span>
             </button>
             {membership.role === 'CHURCH_ADMIN' && (
-              <button onClick={() => router.push('/billing')} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all">
-                <div className="w-10 h-10 bg-[#FFFBEB] rounded-xl flex items-center justify-center mx-auto mb-2"><span className="text-lg">💳</span></div>
-                <span className="text-xs font-medium text-gray-700">결제 관리</span>
+              <button onClick={() => router.push('/billing')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all group">
+                <div className="w-12 h-12 bg-[#0F1A2E] rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-[#C9A84C] transition-colors">
+                  <svg className="w-5 h-5 text-[#C9A84C] group-hover:text-[#0F1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                </div>
+                <span className="text-xs font-semibold text-gray-700">결제 관리</span>
               </button>
             )}
           </div>
@@ -303,11 +321,21 @@ export default function HomePage() {
 
         {/* 교회 정보 */}
         <section>
-          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">교회 정보</h2>
-          <div className="bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-sm">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><span className="text-gray-500">요금제:</span> <span className="ml-1 font-medium">{subscription.plan === 'SEED' ? '새싹' : subscription.plan === 'GROWTH' ? '성장' : '열매'}</span></div>
-              <div><span className="text-gray-500">멤버:</span> <span className="ml-1 font-medium">{churchData.members.length}명</span></div>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2"><span className="w-1 h-4 bg-[#0F1A2E] rounded-full" />교회 정보</h2>
+          <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-[#0F1A2E] rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-[#C9A84C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                </div>
+                <div><span className="text-gray-400 text-xs">요금제</span><br/><span className="font-semibold text-gray-900">{subscription.plan === 'SEED' ? '새싹' : subscription.plan === 'GROWTH' ? '성장' : subscription.plan}</span></div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-[#0F1A2E] rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-[#C9A84C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                </div>
+                <div><span className="text-gray-400 text-xs">멤버</span><br/><span className="font-semibold text-gray-900">{churchData.members.length}명</span></div>
+              </div>
             </div>
           </div>
         </section>

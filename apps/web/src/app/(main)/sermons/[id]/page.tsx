@@ -209,10 +209,12 @@ ${sermon.conclusion}
         <h2 className="text-base sm:text-lg font-semibold text-gray-900">{label}</h2>
         {enrich && (
           <button onClick={() => handleEnrich(parseInt(k.split('_')[1]))} disabled={!!enrichLoading}
-            className="text-xs text-amber-600 px-2 py-1 border border-amber-200 rounded-lg hover:bg-amber-50 disabled:opacity-50 flex items-center gap-1">
+            className="text-xs text-[#0F1A2E] px-3 py-1.5 bg-[#FFF8E7] border border-[#C9A84C]/30 rounded-xl hover:bg-[#C9A84C]/20 disabled:opacity-50 flex items-center gap-1.5 font-medium transition-colors">
             {enrichLoading === k ? (
-              <><span className="w-3 h-3 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin" /> 적용중 {enrichSec}초</>
-            ) : '✨ 예화 포함'}
+              <><span className="w-3 h-3 border-2 border-[#C9A84C]/30 border-t-[#C9A84C] rounded-full animate-spin" /> 적용중 {enrichSec}초</>
+            ) : (
+              <><svg className="w-3.5 h-3.5 text-[#C9A84C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg> 예화 추가</>
+            )}
           </button>
         )}
       </div>
@@ -276,11 +278,14 @@ ${sermon.conclusion}
         {/* 참고자료 */}
         {sermon.citations.length > 0 && (
           <section className="mb-6">
-            <h2 className="text-sm font-semibold text-gray-500 mb-2">참고자료</h2>
-            <div className="bg-gray-100 rounded-xl p-4 space-y-1">
+            <h2 className="text-sm font-semibold text-gray-500 mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-[#C9A84C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+              참고자료
+            </h2>
+            <div className="bg-[#FAFAF8] rounded-2xl p-4 space-y-2 border border-gray-100">
               {sermon.citations.map(c => (
-                <div key={c.id} className="text-sm text-gray-600">
-                  <span className="bg-gray-200 text-xs px-2 py-0.5 rounded mr-2">{c.type === 'REFERENCE' ? '참고' : '배경'}</span>
+                <div key={c.id} className="text-sm text-gray-600 flex items-start gap-2">
+                  <span className="bg-[#0F1A2E] text-[#C9A84C] text-[10px] px-2 py-0.5 rounded-lg font-medium flex-shrink-0 mt-0.5">{c.type === 'REFERENCE' ? '참고' : '배경'}</span>
                   {c.author}, &ldquo;{c.title}&rdquo;
                 </div>
               ))}
@@ -289,10 +294,13 @@ ${sermon.conclusion}
         )}
 
         {/* AI 수정 요청 */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 mb-4">
           <button onClick={() => setRegenOpen(!regenOpen)} className="w-full flex items-center justify-between text-sm font-medium text-gray-700">
-            <span>🔄 AI 수정 요청 {sermon.regenerationCount > 0 && `(${sermon.regenerationCount}/5)`}</span>
-            <span className="text-gray-400">{regenOpen ? '닫기' : '열기'}</span>
+            <span className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-[#C9A84C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+              AI 수정 요청 {sermon.regenerationCount > 0 && <span className="text-[#C9A84C] text-xs">({sermon.regenerationCount}/5)</span>}
+            </span>
+            <span className="text-gray-400 text-xs">{regenOpen ? '닫기' : '열기'}</span>
           </button>
           {regenOpen && (
             <div className="mt-4 space-y-3">
