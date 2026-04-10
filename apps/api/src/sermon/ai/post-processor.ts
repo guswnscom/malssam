@@ -16,6 +16,7 @@ const FORBIDDEN_TERMS = [
 export interface SermonOutput {
   title: string;
   scripture: string;
+  scriptureText?: string;
   summary: string;
   introduction: string;
   outline: Array<{ point: number; title: string; content: string }>;

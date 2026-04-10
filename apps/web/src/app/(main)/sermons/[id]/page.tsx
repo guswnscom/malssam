@@ -147,13 +147,46 @@ export default function SermonDetailPage() {
 
   const dateStr = new Date(sermon.targetDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 
+  // 예화 포함 요청
+  const [enrichingSection, setEnrichingSection] = useState<string | null>(null);
+
+  const handleEnrich = async (sectionKey: string) => {
+    if (!sermon) return;
+    setEnrichingSection(sectionKey);
+    try {
+      const idx = parseInt(sectionKey.split('_')[1]);
+      const point = sermon.outline[idx];
+      const { data } = await api.post(`/sermons/${sermon.id}/regenerate`, {
+        feedback: `"${point.title}" 대지에 실생활 예화, 역사적 사례, 또는 현재 사회/세계 상황과 연결되는 구체적인 이야기를 추가해주세요. 성경 본문 "${sermon.scripture}"과 자연스럽게 연결되어야 합니다. 주석 설명보다 이야기와 적용 중심으로 바꿔주세요.`,
+        targetSection: `OUTLINE_${idx + 1}`,
+      });
+      setSermon(data);
+    } catch (err: any) {
+      alert(err.response?.data?.message || '예화 추가에 실패했습니다');
+    } finally {
+      setEnrichingSection(null);
+    }
+  };
+
   // 편집 가능 섹션 컴포넌트
-  const EditableSection = ({ sectionKey, label, content, color = 'blue' }: { sectionKey: string; label: string; content: string; color?: string }) => {
+  const EditableSection = ({ sectionKey, label, content, color = 'blue', showEnrich = false }: { sectionKey: string; label: string; content: string; color?: string; showEnrich?: boolean }) => {
     const isEditing = editingSection === sectionKey;
+    const isEnriching = enrichingSection === sectionKey;
     const bgColors: Record<string, string> = { blue: 'bg-white', amber: 'bg-amber-50 border-amber-100', green: 'bg-white' };
     return (
       <section className="mb-5">
-        <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">{label}</h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">{label}</h2>
+          {showEnrich && !isEditing && (
+            <button
+              onClick={() => handleEnrich(sectionKey)}
+              disabled={isEnriching}
+              className="text-xs text-amber-600 hover:text-amber-800 font-medium px-2 py-1 border border-amber-200 rounded-lg hover:bg-amber-50 disabled:opacity-50"
+            >
+              {isEnriching ? '✨ 적용 중...' : '✨ 예화 포함'}
+            </button>
+          )}
+        </div>
         {isEditing ? (
           <div className="space-y-2">
             <textarea
@@ -262,6 +295,7 @@ export default function SermonDetailPage() {
             sectionKey={`outline_${idx}`}
             label={`${point.point}. ${point.title}`}
             content={point.content}
+            showEnrich={true}
           />
         ))}
 
@@ -323,7 +357,55 @@ export default function SermonDetailPage() {
           )}
         </div>
 
-        {/* 하단 버튼 */}
+        {/* 하단 액션 버튼 */}
+        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+            <button
+              onClick={async () => {
+                setSaving(true);
+                try {
+                  await api.put(`/sermons/${sermon.id}`, {
+                    title: sermon.title, summary: sermon.summary,
+                    introduction: sermon.introduction, outline: sermon.outline,
+                    application: sermon.application, conclusion: sermon.conclusion,
+                  });
+                  setSaved(true);
+                  alert('저장되었습니다');
+                } catch { alert('저장 실패'); } finally { setSaving(false); }
+              }}
+              disabled={saving}
+              className="py-2.5 rounded-lg text-sm font-semibold bg-green-600 text-white hover:bg-green-700 disabled:bg-green-300"
+            >
+              {saving ? '저장 중...' : '💾 저장'}
+            </button>
+            <button onClick={handlePpt} className="py-2.5 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700">PPT</button>
+            <button onClick={handlePdf} className="py-2.5 rounded-lg text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200">PDF</button>
+            <button onClick={() => setDeleteConfirm(true)} className="py-2.5 rounded-lg text-sm font-medium text-red-500 border border-red-200 hover:bg-red-50">삭제</button>
+          </div>
+
+          {/* AI 최종검토 버튼 */}
+          <button
+            onClick={async () => {
+              if (!saved) { alert('먼저 저장해주세요'); return; }
+              setRegenLoading(true);
+              try {
+                const { data } = await api.post(`/sermons/${sermon.id}/regenerate`, {
+                  feedback: '전체 설교를 최종 검토해주세요. 전달력, 구조, 자연스러움, 적용의 구체성을 점검하고 개선해주세요. 주석 설명은 줄이고, 강단에서 전달하기 좋은 형태로 다듬어주세요.',
+                  targetSection: 'FULL',
+                });
+                setSermon(data);
+                alert('AI 최종검토가 완료되었습니다. 원본은 이전 버전으로 남아있습니다.');
+              } catch (err: any) { alert(err.response?.data?.message || 'AI 검토에 실패했습니다'); }
+              finally { setRegenLoading(false); }
+            }}
+            disabled={regenLoading || !saved || sermon.regenerationCount >= 5}
+            className="w-full py-3 rounded-lg text-sm font-semibold bg-purple-600 text-white hover:bg-purple-700 disabled:bg-purple-300"
+          >
+            {regenLoading ? '🔍 AI 검토 중...' : '🔍 AI 최종검토 (저장 후 사용 가능)'}
+          </button>
+        </div>
+
+        {/* 네비게이션 */}
         <div className="flex gap-3">
           <button onClick={() => router.push('/sermons/new')} className="flex-1 py-3 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700">새 설교 만들기</button>
           <button onClick={() => router.push('/home')} className="px-6 py-3 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200">홈</button>

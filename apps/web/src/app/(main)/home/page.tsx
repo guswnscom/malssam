@@ -174,22 +174,57 @@ export default function HomePage() {
         <section>
           <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">이번주 예배</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            {churchData.profile.worshipTypes.map((type) => (
-              <div key={type} className="bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-gray-900">{WORSHIP_LABEL[type] || type}</h3>
-                    <p className="text-sm text-gray-500 mt-1">미작성</p>
+            {churchData.profile.worshipTypes.map((type) => {
+              // 해당 예배 유형의 최근 설교 찾기
+              const matchingSermon = recentSermons.find(s => s.worshipType === type);
+              const WORSHIP_DAY: Record<string, number> = { SUNDAY: 0, WEDNESDAY: 3, FRIDAY: 5, DAWN: 1, SPECIAL: 6 };
+              const today = new Date();
+              const todayDay = today.getDay();
+              const worshipDay = WORSHIP_DAY[type] ?? 0;
+              const isPast = todayDay > worshipDay && type !== 'DAWN';
+              const isToday = todayDay === worshipDay;
+
+              let statusMsg = '';
+              let statusColor = 'text-gray-500';
+              if (matchingSermon) {
+                statusMsg = '✅ 작성됨';
+                statusColor = 'text-green-600';
+              } else if (isToday) {
+                statusMsg = `목사님, 오늘 ${WORSHIP_LABEL[type]}가 있습니다. 설교를 준비해주세요!`;
+                statusColor = 'text-red-500 font-medium';
+              } else if (isPast) {
+                statusMsg = `돌아오는 ${WORSHIP_LABEL[type]} 설교 작성이 필요합니다`;
+                statusColor = 'text-amber-600';
+              } else {
+                statusMsg = '미작성';
+              }
+
+              return (
+                <div key={type} className="bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900">{WORSHIP_LABEL[type] || type}</h3>
+                      <p className={`text-xs sm:text-sm mt-1 ${statusColor}`}>{statusMsg}</p>
+                    </div>
+                    {matchingSermon ? (
+                      <button
+                        onClick={() => router.push(`/sermons/${matchingSermon.id}`)}
+                        className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-green-700 transition-colors flex-shrink-0"
+                      >
+                        보기
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => router.push('/sermons/new')}
+                        className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors flex-shrink-0"
+                      >
+                        설교 만들기
+                      </button>
+                    )}
                   </div>
-                  <button
-                    onClick={() => router.push('/sermons/new')}
-                    className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                  >
-                    설교 만들기
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
