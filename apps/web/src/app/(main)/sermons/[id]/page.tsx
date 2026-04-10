@@ -418,14 +418,14 @@ ${sermon.conclusion}
         {/* 액션 버튼 */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 mb-4">
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-3">
-            <button onClick={handleSave} disabled={saving} className="py-2.5 rounded-xl text-sm font-semibold bg-[#0F1A2E] text-white hover:bg-[#1B2D4A] disabled:bg-gray-300">
+            <button onClick={handleSave} disabled={saving} className="py-2.5 rounded-xl text-sm font-bold bg-[#0F1A2E] text-white hover:bg-[#1B2D4A] disabled:bg-gray-300 shadow-md shadow-[#0F1A2E]/20">
               {saving ? '저장중...' : '💾 저장'}
             </button>
-            <button onClick={handlePptPrompt} className="py-2.5 rounded-xl text-sm font-semibold bg-[#C9A84C] text-[#0F1A2E] hover:bg-[#D4B85C]" title="Gemini/GPT에서 PPT를 만드세요">PPT 프롬프트</button>
-            <button onClick={handlePdf} className="py-2.5 rounded-xl text-sm font-semibold bg-[#EFF6FF] text-[#1E40AF] hover:bg-[#DBEAFE] border border-[#BFDBFE]">PDF 보기</button>
-            <button onClick={handleExportPdf} className="py-2.5 rounded-xl text-sm font-semibold bg-[#ECFDF5] text-[#059669] hover:bg-[#D1FAE5] border border-[#A7F3D0]">📥 PDF 저장</button>
-            <button onClick={handleShare} className="py-2.5 rounded-xl text-sm font-semibold bg-[#F5F3FF] text-[#7C3AED] hover:bg-[#EDE9FE] border border-[#C4B5FD]">📤 공유</button>
-            <button onClick={() => setShowDelete(true)} className="py-2.5 rounded-xl text-sm font-medium bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] hover:bg-[#FEE2E2]">삭제</button>
+            <button onClick={handlePptPrompt} className="py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#C9A84C] to-[#A8893A] text-white hover:from-[#D4B85C] hover:to-[#B8994A] shadow-md shadow-[#C9A84C]/20" title="Gemini/GPT에서 PPT를 만드세요">PPT 프롬프트</button>
+            <button onClick={handlePdf} className="py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#3B82F6] to-[#2563EB] text-white hover:from-[#60A5FA] hover:to-[#3B82F6] shadow-md shadow-[#3B82F6]/20">PDF 보기</button>
+            <button onClick={handleExportPdf} className="py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#059669] to-[#047857] text-white hover:from-[#10B981] hover:to-[#059669] shadow-md shadow-[#059669]/20">📥 저장</button>
+            <button onClick={handleShare} className="py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white hover:from-[#8B5CF6] hover:to-[#7C3AED] shadow-md shadow-[#7C3AED]/20">📤 공유</button>
+            <button onClick={() => setShowDelete(true)} className="py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#EF4444] to-[#DC2626] text-white hover:from-[#F87171] hover:to-[#EF4444] shadow-md shadow-[#EF4444]/20">삭제</button>
           </div>
           {regenLoading ? (
             <div className="w-full py-4 rounded-lg bg-purple-50 border border-purple-200 text-center">
