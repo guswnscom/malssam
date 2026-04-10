@@ -34,6 +34,8 @@ export default function SermonDetailPage() {
   const [enrichLoading, setEnrichLoading] = useState('');
   const [showDelete, setShowDelete] = useState(false);
   const [reviewResult, setReviewResult] = useState<{ before: SermonData; after: SermonData; changes: string[] } | null>(null);
+  const [reviewSec, setReviewSec] = useState(0);
+  const [enrichSec, setEnrichSec] = useState(0);
 
   const sid = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
 
@@ -91,6 +93,8 @@ export default function SermonDetailPage() {
     if (!sermon) return;
     const key = `outline_${idx}`;
     setEnrichLoading(key);
+    setEnrichSec(0);
+    const timer = setInterval(() => setEnrichSec(s => s + 1), 1000);
     try {
       const pt = sermon.outline[idx];
       const r = await api.post(`/sermons/${sermon.id}/regenerate`, {
@@ -99,16 +103,49 @@ export default function SermonDetailPage() {
       });
       setSermon(r.data);
     } catch (e: any) { alert(e?.response?.data?.message || '예화 추가 실패'); }
-    finally { setEnrichLoading(''); }
+    finally { clearInterval(timer); setEnrichLoading(''); setEnrichSec(0); }
   };
 
-  const handlePpt = async () => {
-    try {
-      const r = await api.get(`/sermons/${sermon.id}/ppt`, { responseType: 'blob' });
-      const a = document.createElement('a');
-      a.href = window.URL.createObjectURL(new Blob([r.data]));
-      a.download = `${sermon.title}.pptx`; a.click();
-    } catch { alert('PPT 실패'); }
+  const handlePptPrompt = () => {
+    if (!sermon) return;
+    const prompt = `아래 설교 내용을 기반으로 예배용 PPT 슬라이드를 만들어주세요.
+
+[설교 정보]
+- 제목: ${sermon.title}
+- 성경 본문: ${sermon.scripture}
+- 예배: ${WL[sermon.worshipType] || sermon.worshipType}
+
+[슬라이드 구성 요청]
+1. 표지 슬라이드: 설교 제목 + 성경 본문
+2. 본문 슬라이드: 성경 구절 표시
+3~5. 대지별 슬라이드: 각 대지의 핵심 메시지 1~2줄 + 관련 이미지
+6. 적용 슬라이드: 이번 주 실천 포인트
+7. 마무리 슬라이드: 핵심 한 줄 + 성경 본문
+
+[설교 본문]
+
+[서론]
+${sermon.introduction}
+
+${sermon.outline.map(p => `[대지 ${p.point}: ${p.title}]\n${p.content}`).join('\n\n')}
+
+[적용]
+${sermon.application}
+
+[결론]
+${sermon.conclusion}
+
+[디자인 요청]
+- 깔끔하고 차분한 기독교 느낌
+- 각 슬라이드에 주제에 맞는 이미지 포함
+- 텍스트는 핵심 키워드 중심으로 최소화
+- 배경은 어둡지 않고 밝고 따뜻하게`;
+
+    const blob = new Blob([prompt], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `PPT_프롬프트_${sermon.title}.txt`;
+    a.click();
   };
 
   const handlePdf = () => {
@@ -134,9 +171,10 @@ export default function SermonDetailPage() {
 
   const handleFinalReview = async () => {
     if (!sermon) return;
-    // 기존 버전 저장
     const before = { ...sermon };
     setRegenLoading(true);
+    setReviewSec(0);
+    const timer = setInterval(() => setReviewSec(s => s + 1), 1000);
     try {
       // 먼저 현재 상태 저장
       await api.put(`/sermons/${sermon.id}`, {
@@ -162,7 +200,7 @@ export default function SermonDetailPage() {
       setSermon(after);
       setReviewResult({ before, after, changes });
     } catch (e: any) { alert(e?.response?.data?.message || 'AI 검토 실패'); }
-    finally { setRegenLoading(false); }
+    finally { clearInterval(timer); setRegenLoading(false); setReviewSec(0); }
   };
 
   const Section = ({ k, label, text, bg = '', enrich = false }: { k: string; label: string; text: string; bg?: string; enrich?: boolean }) => (
@@ -170,9 +208,11 @@ export default function SermonDetailPage() {
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-base sm:text-lg font-semibold text-gray-900">{label}</h2>
         {enrich && (
-          <button onClick={() => handleEnrich(parseInt(k.split('_')[1]))} disabled={enrichLoading === k}
-            className="text-xs text-amber-600 px-2 py-1 border border-amber-200 rounded-lg hover:bg-amber-50 disabled:opacity-50">
-            {enrichLoading === k ? '✨ 적용중...' : '✨ 예화 포함'}
+          <button onClick={() => handleEnrich(parseInt(k.split('_')[1]))} disabled={!!enrichLoading}
+            className="text-xs text-amber-600 px-2 py-1 border border-amber-200 rounded-lg hover:bg-amber-50 disabled:opacity-50 flex items-center gap-1">
+            {enrichLoading === k ? (
+              <><span className="w-3 h-3 border-2 border-amber-300 border-t-amber-600 rounded-full animate-spin" /> 적용중 {enrichSec}초</>
+            ) : '✨ 예화 포함'}
           </button>
         )}
       </div>
@@ -276,14 +316,27 @@ export default function SermonDetailPage() {
             <button onClick={handleSave} disabled={saving} className="py-2.5 rounded-lg text-sm font-semibold bg-green-600 text-white hover:bg-green-700 disabled:bg-green-300">
               {saving ? '저장중...' : '💾 저장'}
             </button>
-            <button onClick={handlePpt} className="py-2.5 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700">PPT</button>
+            <button onClick={handlePptPrompt} className="py-2.5 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700" title="AI PPT 제작용 프롬프트를 다운로드합니다. Gemini/GPT에 올려서 PPT를 만드세요.">PPT 프롬프트</button>
             <button onClick={handlePdf} className="py-2.5 rounded-lg text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200">PDF</button>
             <button onClick={() => setShowDelete(true)} className="py-2.5 rounded-lg text-sm text-red-500 border border-red-200 hover:bg-red-50">삭제</button>
           </div>
-          <button onClick={handleFinalReview} disabled={regenLoading || sermon.regenerationCount >= 5}
-            className="w-full py-3 rounded-lg text-sm font-semibold bg-purple-600 text-white hover:bg-purple-700 disabled:bg-purple-300">
-            {regenLoading ? '🔍 AI가 검토 중입니다 (15~30초 소요, 길이에 따라 더 걸릴 수 있습니다)...' : '🔍 AI 최종검토'}
-          </button>
+          {regenLoading ? (
+            <div className="w-full py-4 rounded-lg bg-purple-50 border border-purple-200 text-center">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <div className="w-6 h-6 border-3 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+                <span className="text-sm font-semibold text-purple-700">AI가 검토 중입니다...</span>
+              </div>
+              <div className="w-48 mx-auto bg-purple-200 rounded-full h-2 mb-1">
+                <div className="bg-purple-600 h-2 rounded-full transition-all duration-1000" style={{ width: `${Math.min(95, (reviewSec / 60) * 100)}%` }} />
+              </div>
+              <p className="text-xs text-purple-500">경과: {reviewSec}초 | 평균 30~60초</p>
+            </div>
+          ) : (
+            <button onClick={handleFinalReview} disabled={sermon.regenerationCount >= 5}
+              className="w-full py-3 rounded-lg text-sm font-semibold bg-purple-600 text-white hover:bg-purple-700 disabled:bg-purple-300">
+              🔍 AI 최종검토
+            </button>
+          )}
         </div>
 
         {/* AI 검토 비교 결과 */}
