@@ -51,7 +51,7 @@ export class AiService {
         const response = await this.client.messages.create({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 8000,
-          temperature: 0.7,
+          temperature: 0.9,
           system: SYSTEM_PROMPT,
           messages: [{ role: 'user', content: userPrompt }],
         });
