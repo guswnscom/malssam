@@ -152,14 +152,14 @@ export class AuthService {
         { sub: userId },
         {
           secret: this.config.get('JWT_ACCESS_SECRET'),
-          expiresIn: this.config.get('JWT_ACCESS_EXPIRY') || '15m',
+          expiresIn: this.config.get('JWT_ACCESS_EXPIRY') || '7d',
         },
       ),
       this.jwt.signAsync(
         { sub: userId },
         {
           secret: this.config.get('JWT_REFRESH_SECRET'),
-          expiresIn: this.config.get('JWT_REFRESH_EXPIRY') || '7d',
+          expiresIn: this.config.get('JWT_REFRESH_EXPIRY') || '90d',
         },
       ),
     ]);
