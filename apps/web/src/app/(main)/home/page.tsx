@@ -113,11 +113,23 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* 상단 바 */}
-      <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4 relative overflow-hidden">
-        {/* 중앙 십자가 장식 — 선명하게 */}
-        <div className="absolute left-1/2 -translate-x-1/2 -top-2 opacity-[0.15]">
-          <svg width="160" height="160" viewBox="0 0 24 24" fill="#C9A84C"><path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z"/></svg>
+      <header className="bg-[#0F1A2E] px-4 sm:px-6 py-5 sm:py-6 relative overflow-hidden">
+        {/* 배경 광선 효과 */}
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 50% 30%, #C9A84C 0%, transparent 50%)' }} />
+        {/* 대형 십자가 장식 — 중앙 상단에 크고 선명하게 */}
+        <div className="absolute left-1/2 -translate-x-1/2 -top-6 sm:-top-4">
+          <svg width="220" height="220" viewBox="0 0 100 100" fill="none" className="opacity-[0.12]">
+            {/* 메인 십자가 */}
+            <rect x="42" y="5" width="16" height="90" rx="2" fill="#C9A84C"/>
+            <rect x="15" y="30" width="70" height="16" rx="2" fill="#C9A84C"/>
+            {/* 십자가 내부 하이라이트 */}
+            <rect x="46" y="9" width="8" height="82" rx="1" fill="#C9A84C" opacity="0.3"/>
+            <rect x="19" y="34" width="62" height="8" rx="1" fill="#C9A84C" opacity="0.3"/>
+          </svg>
         </div>
+        {/* 좌우 장식 라인 */}
+        <div className="absolute top-1/2 left-4 sm:left-8 -translate-y-1/2 w-12 sm:w-20 h-[1px] bg-gradient-to-r from-transparent to-[#C9A84C]/20" />
+        <div className="absolute top-1/2 right-4 sm:right-8 -translate-y-1/2 w-12 sm:w-20 h-[1px] bg-gradient-to-l from-transparent to-[#C9A84C]/20" />
         <div className="max-w-4xl mx-auto flex items-center justify-between relative">
           <div>
             <h1 className="text-lg sm:text-xl font-bold text-white">{church.name}</h1>

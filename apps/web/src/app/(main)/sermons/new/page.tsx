@@ -5,15 +5,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 
 const WORSHIP_TYPES = [
-  { value: 'SUNDAY', label: '주일예배', color: 'from-[#C9A84C] to-[#8B6914]',
+  { value: 'SUNDAY', label: '주일예배', desc: '주일 아침, 온 성도가 함께하는 예배', color: 'from-[#C9A84C] to-[#8B6914]', accent: '#C9A84C',
     svg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 2v8m0 4v8m-6-14h12M6 18h12"/>' },
-  { value: 'WEDNESDAY', label: '수요예배', color: 'from-[#3B82F6] to-[#1D4ED8]',
+  { value: 'WEDNESDAY', label: '수요예배', desc: '주중 말씀 묵상과 기도의 시간', color: 'from-[#3B82F6] to-[#1D4ED8]', accent: '#3B82F6',
     svg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>' },
-  { value: 'FRIDAY', label: '금요예배', color: 'from-[#8B5CF6] to-[#6D28D9]',
+  { value: 'FRIDAY', label: '금요예배', desc: '한 주를 마무리하는 기도와 찬양', color: 'from-[#8B5CF6] to-[#6D28D9]', accent: '#8B5CF6',
     svg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>' },
-  { value: 'DAWN', label: '새벽예배', color: 'from-[#F59E0B] to-[#D97706]',
+  { value: 'DAWN', label: '새벽예배', desc: '이른 아침, 하나님과의 고요한 만남', color: 'from-[#F59E0B] to-[#D97706]', accent: '#F59E0B',
     svg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>' },
-  { value: 'SPECIAL', label: '특별예배', color: 'from-[#EC4899] to-[#BE185D]',
+  { value: 'SPECIAL', label: '특별예배', desc: '절기, 행사 등 특별한 예배', color: 'from-[#EC4899] to-[#BE185D]', accent: '#EC4899',
     svg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>' },
 ];
 
@@ -160,8 +160,12 @@ function NewSermonPage() {
     <div className="min-h-screen">
       {/* 상단 */}
       <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4 relative overflow-hidden">
-        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 opacity-[0.05]">
-          <svg width="80" height="80" viewBox="0 0 24 24" fill="#C9A84C"><path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z"/></svg>
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 50% 30%, #C9A84C 0%, transparent 50%)' }} />
+        <div className="absolute left-1/2 -translate-x-1/2 -top-4 opacity-[0.10]">
+          <svg width="140" height="140" viewBox="0 0 100 100" fill="none">
+            <rect x="42" y="5" width="16" height="90" rx="2" fill="#C9A84C"/>
+            <rect x="15" y="30" width="70" height="16" rx="2" fill="#C9A84C"/>
+          </svg>
         </div>
         <div className="max-w-2xl mx-auto flex items-center justify-between relative">
           <button onClick={() => router.push('/home')} className="text-[#8B9DC3] hover:text-white">
@@ -186,17 +190,17 @@ function NewSermonPage() {
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-2">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
                   s === step
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-[#0F1A2E] text-[#C9A84C] ring-2 ring-[#C9A84C]/30'
                     : s < step
-                      ? 'bg-blue-100 text-blue-600'
+                      ? 'bg-[#C9A84C] text-white'
                       : 'bg-gray-200 text-gray-500'
                 }`}
               >
-                {s}
+                {s < step ? '✓' : s}
               </div>
-              {s < 3 && <div className={`w-8 sm:w-16 h-0.5 ${s < step ? 'bg-blue-400' : 'bg-gray-200'}`} />}
+              {s < 3 && <div className={`w-8 sm:w-16 h-0.5 ${s < step ? 'bg-[#C9A84C]' : 'bg-gray-200'}`} />}
             </div>
           ))}
         </div>
@@ -206,31 +210,50 @@ function NewSermonPage() {
         {/* Step 1: 예배 선택 */}
         {step === 1 && (
           <div>
-            <h2 className="text-xl font-semibold mb-6">예배를 선택하세요</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-              {WORSHIP_TYPES.map((w) => (
-                <button
-                  key={w.value}
-                  onClick={() => setForm({ ...form, worshipType: w.value })}
-                  className={`p-5 rounded-2xl text-center transition-all ${
-                    form.worshipType === w.value
-                      ? 'bg-[#0F1A2E] border-2 border-[#C9A84C] shadow-lg'
-                      : 'bg-white/80 border-2 border-gray-100 hover:border-[#C9A84C]/30 hover:shadow-md'
-                  }`}
-                >
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 bg-gradient-to-br ${w.color} shadow-lg`}>
-                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: w.svg }} />
-                  </div>
-                  <span className={`text-sm font-semibold ${form.worshipType === w.value ? 'text-[#C9A84C]' : 'text-gray-700'}`}>{w.label}</span>
-                </button>
-              ))}
+            <h2 className="heading-serif text-xl sm:text-2xl text-[#0F1A2E] mb-2">예배를 선택하세요</h2>
+            <p className="text-sm text-gray-500 mb-6">어떤 예배를 위한 설교를 준비하시겠습니까?</p>
+            <div className="space-y-3 mb-6">
+              {WORSHIP_TYPES.map((w) => {
+                const selected = form.worshipType === w.value;
+                return (
+                  <button
+                    key={w.value}
+                    onClick={() => setForm({ ...form, worshipType: w.value })}
+                    className={`w-full text-left rounded-2xl transition-all duration-200 relative overflow-hidden group ${
+                      selected
+                        ? 'bg-[#0F1A2E] shadow-xl ring-2 ring-[#C9A84C]/60'
+                        : 'bg-white/90 backdrop-blur-sm border border-gray-100 hover:border-[#C9A84C]/30 hover:shadow-lg'
+                    }`}
+                  >
+                    {/* 선택 시 골드 글로우 */}
+                    {selected && <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: `radial-gradient(circle at 20% 50%, ${w.accent} 0%, transparent 60%)` }} />}
+                    <div className="relative flex items-center gap-4 p-4 sm:p-5">
+                      {/* 아이콘 */}
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${w.color} shadow-lg ${selected ? 'shadow-[#C9A84C]/30' : ''}`}>
+                        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: w.svg }} />
+                      </div>
+                      {/* 텍스트 */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`font-bold text-base ${selected ? 'text-[#C9A84C]' : 'text-gray-900'}`}>{w.label}</h3>
+                        <p className={`text-xs mt-0.5 ${selected ? 'text-[#8B9DC3]' : 'text-gray-400'}`}>{w.desc}</p>
+                      </div>
+                      {/* 체크 인디케이터 */}
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+                        selected ? 'bg-[#C9A84C] text-[#0F1A2E]' : 'border-2 border-gray-200 group-hover:border-[#C9A84C]/40'
+                      }`}>
+                        {selected && <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">날짜</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">예배 날짜</label>
               <input
                 type="date"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-[#C9A84C]/30 focus:border-[#C9A84C] outline-none text-sm"
                 value={form.targetDate}
                 onChange={(e) => setForm({ ...form, targetDate: e.target.value })}
               />
@@ -335,7 +358,7 @@ function NewSermonPage() {
           {step > 1 && (
             <button
               onClick={() => setStep(step - 1)}
-              className="px-6 py-3 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+              className="px-6 py-3.5 rounded-xl text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors text-sm font-medium"
             >
               이전
             </button>
@@ -344,17 +367,17 @@ function NewSermonPage() {
             <button
               onClick={() => setStep(step + 1)}
               disabled={!canNext()}
-              className="flex-1 py-3 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
+              className="flex-1 py-3.5 rounded-xl font-bold bg-[#0F1A2E] text-white hover:bg-[#1B2D4A] disabled:bg-gray-300 disabled:text-gray-500 transition-colors text-sm"
             >
-              다음
+              다음 단계
             </button>
           ) : (
             <button
               onClick={handleGenerate}
               disabled={!canNext()}
-              className="flex-1 py-3 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
+              className="flex-1 py-3.5 rounded-xl font-bold bg-[#C9A84C] text-[#0F1A2E] hover:bg-[#D4B85C] disabled:bg-gray-300 disabled:text-gray-500 transition-colors text-sm"
             >
-              설교 생성하기
+              ✝ 설교 생성하기
             </button>
           )}
         </div>
