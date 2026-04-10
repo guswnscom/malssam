@@ -103,26 +103,26 @@ export default function HomePage() {
   const upcomingEvents = getUpcomingEvents();
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-[#FAFAF8] min-h-screen">
       {/* 상단 바 */}
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+      <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-lg sm:text-xl font-bold text-gray-900">{church.name}</h1>
-            <p className="text-xs sm:text-sm text-gray-500">{ROLE_LABEL[membership.role] || membership.role}</p>
+            <h1 className="text-lg sm:text-xl font-bold text-white">{church.name}</h1>
+            <p className="text-xs sm:text-sm text-[#8B9DC3]">{ROLE_LABEL[membership.role] || membership.role}</p>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             {subscription.status === 'trial' && (
-              <span className="bg-blue-100 text-blue-700 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+              <span className="bg-[#C9A84C]/20 text-[#C9A84C] px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border border-[#C9A84C]/30">
                 무료체험 D-{subscription.trialDaysLeft}
               </span>
             )}
             {subscription.status === 'active' && (
-              <span className="bg-green-100 text-green-700 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+              <span className="bg-green-900/30 text-green-300 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border border-green-500/30">
                 구독 중
               </span>
             )}
-            <button onClick={handleLogout} className="text-xs sm:text-sm text-gray-500 hover:text-gray-700">
+            <button onClick={handleLogout} className="text-xs sm:text-sm text-[#5A6F8C] hover:text-white">
               로그아웃
             </button>
           </div>
