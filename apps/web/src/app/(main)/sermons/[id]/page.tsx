@@ -108,19 +108,69 @@ export default function SermonDetailPage() {
 
   const handlePptPrompt = () => {
     if (!sermon) return;
-    const prompt = `아래 설교 내용을 기반으로 예배용 PPT 슬라이드를 만들어주세요.
+
+    // 예배 유형별 슬라이드 수 설정
+    const SLIDE_CONFIG: Record<string, { total: number; outlineSlides: number; desc: string }> = {
+      SUNDAY: { total: 12, outlineSlides: 4, desc: '대예배 (10~12장)' },
+      SPECIAL: { total: 12, outlineSlides: 4, desc: '특별예배 (10~12장)' },
+      WEDNESDAY: { total: 8, outlineSlides: 2, desc: '수요예배 (8장)' },
+      FRIDAY: { total: 6, outlineSlides: 1, desc: '금요예배 (6장)' },
+      DAWN: { total: 6, outlineSlides: 1, desc: '새벽예배 (6장)' },
+    };
+    const config = SLIDE_CONFIG[sermon.worshipType] || SLIDE_CONFIG.SUNDAY;
+
+    // 대예배/특별예배: 대지별로 핵심내용 + 예화/적용을 분리하여 여러 슬라이드
+    // 수요예배: 대지별 1~2장씩 핵심 중심으로
+    // 금요/새벽: 대지 전체를 압축하여 핵심 키워드 중심
+    let slideStructure = '';
+
+    if (sermon.worshipType === 'SUNDAY' || sermon.worshipType === 'SPECIAL') {
+      slideStructure = `총 10~12장의 슬라이드로 구성해주세요.
+1. 표지: 설교 제목 + 성경 본문 + 날짜
+2. 성경 본문: 본문 말씀 전문 표시 (큰 글씨, 경건한 배경)
+3. 서론 핵심: 서론의 핵심 질문 또는 도입 문장 1~2줄
+${sermon.outline.map((p, i) => {
+  const base = 4 + i * 2;
+  return `${base}. 대지 ${p.point} - "${p.title}" 핵심 메시지 (키워드 + 핵심 한 줄)
+${base + 1}. 대지 ${p.point} - 예화/적용 (구체적 이야기나 실생활 적용 포인트)`;
+}).join('\n')}
+${4 + sermon.outline.length * 2}. 적용: 이번 주 구체적 실천 포인트 3가지 (번호 목록)
+${5 + sermon.outline.length * 2}. 결론: 핵심 한 줄 메시지 + 성경 본문 재인용
+${6 + sermon.outline.length * 2}. 마무리: 축도 또는 기도문 (선택)
+
+★ 중요: 청중이 메시지를 따라가기 쉽도록 각 슬라이드에 텍스트는 3줄 이내, 핵심 키워드를 크게 배치하세요.`;
+    } else if (sermon.worshipType === 'WEDNESDAY') {
+      slideStructure = `총 8장의 슬라이드로 구성해주세요.
+1. 표지: 설교 제목 + 성경 본문
+2. 성경 본문: 본문 말씀 (핵심 구절 강조 표시)
+3. 서론: 핵심 도입 메시지 1~2줄
+${sermon.outline.map((p, i) => `${4 + i}. 대지 ${p.point} - "${p.title}": 핵심 메시지 + 적용 포인트 (한 슬라이드에 압축)`).join('\n')}
+${4 + sermon.outline.length}. 적용: 이번 주 실천 포인트 2~3가지
+${5 + sermon.outline.length}. 마무리: 핵심 한 줄 + 기도 요청
+
+★ 수요예배는 핵심 전달 중심으로 간결하게 구성하세요.`;
+    } else {
+      slideStructure = `총 6장의 슬라이드로 간결하게 구성해주세요.
+1. 표지: 설교 제목 + 성경 본문
+2. 성경 본문: 핵심 구절 1~2절만 크게 표시
+3. 핵심 메시지 1: 대지들의 핵심을 1~2개 키워드로 압축
+4. 핵심 메시지 2: 나머지 대지 핵심 + 예화 한 줄
+5. 적용: 오늘 하루 실천 포인트 1~2가지
+6. 마무리: 핵심 한 줄 + 기도
+
+★ ${sermon.worshipType === 'DAWN' ? '새벽예배는 짧고 강렬하게, 하루를 여는 메시지 중심으로' : '금요예배는 한 주를 정리하는 위로와 소망 중심으로'} 구성하세요.`;
+    }
+
+    const prompt = `아래 설교 내용을 기반으로 ${WL[sermon.worshipType] || sermon.worshipType}용 PPT 슬라이드를 만들어주세요.
 
 [설교 정보]
 - 제목: ${sermon.title}
 - 성경 본문: ${sermon.scripture}
 - 예배: ${WL[sermon.worshipType] || sermon.worshipType}
+- 날짜: ${dateStr}
 
-[슬라이드 구성 요청]
-1. 표지 슬라이드: 설교 제목 + 성경 본문
-2. 본문 슬라이드: 성경 구절 표시
-3~5. 대지별 슬라이드: 각 대지의 핵심 메시지 1~2줄 + 관련 이미지
-6. 적용 슬라이드: 이번 주 실천 포인트
-7. 마무리 슬라이드: 핵심 한 줄 + 성경 본문
+[슬라이드 구성 — ${config.desc}]
+${slideStructure}
 
 [설교 본문]
 
@@ -136,10 +186,13 @@ ${sermon.application}
 ${sermon.conclusion}
 
 [디자인 요청]
-- 깔끔하고 차분한 기독교 느낌
-- 각 슬라이드에 주제에 맞는 이미지 포함
-- 텍스트는 핵심 키워드 중심으로 최소화
-- 배경은 어둡지 않고 밝고 따뜻하게`;
+- 깔끔하고 차분한 기독교 느낌의 디자인
+- 각 슬라이드에 주제에 맞는 배경 이미지 포함
+- 텍스트는 핵심 키워드 중심으로 최소화 (한 슬라이드에 3줄 이내)
+- 핵심 키워드는 크고 굵게, 보조 설명은 작게 배치
+- 배경은 밝고 따뜻한 톤 (어둡지 않게)
+- 성경 본문 인용 시 구절 번호 함께 표기
+- 청중이 설교 내용을 시각적으로 따라갈 수 있도록 구성`;
 
     const blob = new Blob([prompt], { type: 'text/plain;charset=utf-8' });
     const a = document.createElement('a');
@@ -151,6 +204,49 @@ ${sermon.conclusion}
   const handlePdf = () => {
     const t = localStorage.getItem('accessToken');
     window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'}/sermons/${sermon.id}/pdf?token=${t}`, '_blank');
+  };
+
+  const handleExportPdf = async () => {
+    // PDF를 다운로드 가능한 형태로 저장
+    const t = localStorage.getItem('accessToken');
+    const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'}/sermons/${sermon.id}/pdf?token=${t}`;
+    // 새 창에서 열어서 인쇄/저장 가능하게
+    const w = window.open(url, '_blank');
+    if (w) {
+      // 페이지 로드 후 인쇄 다이얼로그 자동 실행 (PDF 저장 가능)
+      setTimeout(() => { try { w.print(); } catch {} }, 2000);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!sermon) return;
+    const shareText = `[${WL[sermon.worshipType] || sermon.worshipType}] ${sermon.title}\n📖 ${sermon.scripture}\n📅 ${dateStr}\n\n${sermon.summary}`;
+
+    // Web Share API 지원 시 (모바일)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: sermon.title,
+          text: shareText,
+        });
+        return;
+      } catch {}
+    }
+
+    // 클립보드 복사 (PC)
+    try {
+      await navigator.clipboard.writeText(shareText);
+      alert('설교 요약이 클립보드에 복사되었습니다. 메신저나 이메일에 붙여넣기 하세요.');
+    } catch {
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = shareText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      alert('설교 요약이 클립보드에 복사되었습니다.');
+    }
   };
 
   const handleSave = async () => {
@@ -323,12 +419,14 @@ ${sermon.conclusion}
 
         {/* 액션 버튼 */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 mb-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-3">
             <button onClick={handleSave} disabled={saving} className="py-2.5 rounded-xl text-sm font-semibold bg-[#0F1A2E] text-white hover:bg-[#1B2D4A] disabled:bg-gray-300">
               {saving ? '저장중...' : '💾 저장'}
             </button>
             <button onClick={handlePptPrompt} className="py-2.5 rounded-xl text-sm font-semibold bg-[#C9A84C] text-[#0F1A2E] hover:bg-[#D4B85C]" title="Gemini/GPT에서 PPT를 만드세요">PPT 프롬프트</button>
-            <button onClick={handlePdf} className="py-2.5 rounded-xl text-sm font-semibold bg-[#EFF6FF] text-[#1E40AF] hover:bg-[#DBEAFE] border border-[#BFDBFE]">PDF</button>
+            <button onClick={handlePdf} className="py-2.5 rounded-xl text-sm font-semibold bg-[#EFF6FF] text-[#1E40AF] hover:bg-[#DBEAFE] border border-[#BFDBFE]">PDF 보기</button>
+            <button onClick={handleExportPdf} className="py-2.5 rounded-xl text-sm font-semibold bg-[#ECFDF5] text-[#059669] hover:bg-[#D1FAE5] border border-[#A7F3D0]">📥 PDF 저장</button>
+            <button onClick={handleShare} className="py-2.5 rounded-xl text-sm font-semibold bg-[#F5F3FF] text-[#7C3AED] hover:bg-[#EDE9FE] border border-[#C4B5FD]">📤 공유</button>
             <button onClick={() => setShowDelete(true)} className="py-2.5 rounded-xl text-sm font-medium bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] hover:bg-[#FEE2E2]">삭제</button>
           </div>
           {regenLoading ? (
