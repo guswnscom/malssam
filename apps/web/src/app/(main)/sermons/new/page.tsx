@@ -49,19 +49,22 @@ function NewSermonPage() {
     specialInstruction: '',
   });
 
-  // URL 파라미터에서 본문/힌트 읽기 (절기 연결)
+  // URL 파라미터에서 본문/힌트 읽기 (절기 연결) - 마운트 시 1회만
   useEffect(() => {
-    const scriptureParam = searchParams.get('scripture');
-    const hintParam = searchParams.get('hint');
-    if (scriptureParam) {
-      setForm(prev => ({ ...prev, scripture: scriptureParam }));
-      setStep(2); // 본문이 있으면 Step 2로 바로 이동
-    }
-    if (hintParam) {
-      setHint(hintParam);
-      setForm(prev => ({ ...prev, specialInstruction: `${hintParam} 관련 설교` }));
-    }
-  }, [searchParams]);
+    try {
+      const scriptureParam = searchParams.get('scripture');
+      const hintParam = searchParams.get('hint');
+      if (scriptureParam) {
+        setForm(prev => ({ ...prev, scripture: scriptureParam }));
+        setStep(2);
+      }
+      if (hintParam) {
+        setHint(hintParam);
+        setForm(prev => ({ ...prev, specialInstruction: `${hintParam} 관련 설교` }));
+      }
+    } catch { /* ignore */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const canNext = () => {
     if (step === 1) return form.worshipType !== '';

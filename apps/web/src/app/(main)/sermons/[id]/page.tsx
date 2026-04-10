@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { api } from '@/lib/api';
 
@@ -48,7 +48,9 @@ export default function SermonDetailPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   useEffect(() => {
-    api.get(`/sermons/${params.id}`).then(({ data }) => setSermon(data))
+    const sermonId = Array.isArray(params.id) ? params.id[0] : params.id;
+    if (!sermonId) { setError('설교 ID가 없습니다'); setLoading(false); return; }
+    api.get(`/sermons/${sermonId}`).then(({ data }) => setSermon(data))
       .catch((err) => setError(err.response?.data?.message || '설교를 불러올 수 없습니다'))
       .finally(() => setLoading(false));
   }, [params.id]);
