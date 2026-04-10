@@ -296,17 +296,6 @@ export class SermonService {
     <div class="section-content">${escHtml(draft.conclusion)}</div>
   </div>
 
-  ${citations.length > 0 ? `
-  <div class="references">
-    <h3>참고자료</h3>
-    ${citations.map((c: any) => `
-    <div class="ref">
-      <span class="ref-type">${c.citationType === 'REFERENCE' ? '참고' : '배경'}</span>
-      ${escHtml(c.sourceAuthor || '')}, "${escHtml(c.sourceTitle || '')}"
-    </div>
-    `).join('')}
-  </div>
-  ` : ''}
 </div>
 
 <button class="print-btn no-print" onclick="window.print()">PDF 저장 / 인쇄</button>
