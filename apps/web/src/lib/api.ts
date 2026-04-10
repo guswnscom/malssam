@@ -6,6 +6,7 @@ export const api = axios.create({
   baseURL: API_BASE,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
+  timeout: 180000, // 3분 타임아웃 (설교 생성에 시간이 걸림)
 });
 
 // 요청 인터셉터: JWT 토큰 추가

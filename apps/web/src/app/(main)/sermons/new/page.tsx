@@ -114,31 +114,38 @@ function NewSermonPage() {
   }, [loading]);
 
   if (loading) {
+    // 예상 시간: 30~90초, 프로그레스는 시간 기반 추정
+    const estimatedTotal = 60; // 평균 60초
+    const progress = Math.min(95, Math.round((loadingSec / estimatedTotal) * 100));
+
+    let statusMsg = '';
+    let statusColor = 'text-gray-500';
+    if (loadingSec < 15) { statusMsg = '본문을 분석하고 있습니다...'; }
+    else if (loadingSec < 30) { statusMsg = '설교 구조를 설계하고 있습니다...'; }
+    else if (loadingSec < 60) { statusMsg = '심화된 내용을 교리에 맞게 검토하며 초안을 작성하고 있습니다...'; statusColor = 'text-blue-600'; }
+    else if (loadingSec < 120) { statusMsg = '깊이 있는 설교를 위해 더 자세히 검토 중입니다. 곧 완성됩니다...'; statusColor = 'text-amber-600'; }
+    else { statusMsg = '거의 완성되었습니다. 조금만 더 기다려주세요...'; statusColor = 'text-amber-600'; }
+
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
-        <div className="text-center">
+        <div className="text-center max-w-md w-full">
           <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            AI가 설교를 준비하고 있습니다...
+          <h2 className="text-xl font-semibold text-gray-900 mb-3">
+            AI가 설교를 준비하고 있습니다
           </h2>
 
-          {loadingSec < 20 ? (
-            <p className="text-gray-500">약 15~30초 정도 소요됩니다</p>
-          ) : loadingSec < 60 ? (
-            <p className="text-amber-600">심화된 내용을 교리에 맞게 검토하고 있습니다. 잠시만 기다려주세요...</p>
-          ) : loadingSec < 120 ? (
-            <p className="text-amber-600">깊이 있는 설교를 위해 더 자세히 검토 중입니다. 곧 완성됩니다...</p>
-          ) : (
-            <p className="text-red-500">생성에 시간이 오래 걸리고 있습니다. 잠시 후 다시 시도해주세요.</p>
-          )}
-
-          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-400">
-            <span className={loadingSec > 0 ? 'text-green-500' : ''}>본문 분석 ✓</span>
-            <span>→</span>
-            <span className={loadingSec > 5 ? 'text-green-500' : ''}>구조 설계 {loadingSec > 5 ? '✓' : ''}</span>
-            <span>→</span>
-            <span className="text-blue-600 font-medium">초안 작성 중... ({loadingSec}초)</span>
+          {/* 프로그레스 바 */}
+          <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+            <div className="bg-blue-600 h-3 rounded-full transition-all duration-1000" style={{ width: `${progress}%` }} />
           </div>
+          <div className="flex justify-between text-xs text-gray-400 mb-4">
+            <span>{progress}%</span>
+            <span>평균 30~60초 소요</span>
+          </div>
+
+          <p className={`text-sm ${statusColor}`}>{statusMsg}</p>
+
+          <p className="text-xs text-gray-400 mt-4">경과 시간: {loadingSec}초</p>
         </div>
       </div>
     );
