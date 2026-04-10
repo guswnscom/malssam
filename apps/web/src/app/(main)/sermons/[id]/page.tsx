@@ -225,7 +225,7 @@ ${sermon.conclusion}
           </div>
         </div>
       ) : (
-        <div onClick={() => startEdit(k, text)} className={`${bg || 'bg-white'} rounded-xl border border-gray-100 p-4 cursor-pointer hover:border-blue-200 transition-all group`}>
+        <div onClick={() => startEdit(k, text)} className={`${bg || 'bg-white'} rounded-2xl border border-gray-100 p-4 sm:p-5 cursor-pointer hover:border-[#C9A84C]/30 hover:shadow-sm transition-all group`}>
           <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{text}</p>
           <p className="text-xs text-gray-300 mt-2 opacity-0 group-hover:opacity-100">클릭하여 편집</p>
         </div>
@@ -234,23 +234,23 @@ ${sermon.conclusion}
   );
 
   return (
-    <div className="bg-gray-50 pb-8">
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sticky top-0 z-10">
+    <div className="bg-[#FAFAF8] pb-8">
+      <header className="bg-[#0F1A2E] px-4 sm:px-6 py-3 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <button onClick={() => router.push('/sermons')} className="text-gray-500 text-sm">← 목록</button>
-          <span className="text-xs sm:text-sm text-gray-500">{WL[sermon.worshipType]} · {dateStr}</span>
+          <button onClick={() => router.push('/sermons')} className="text-[#8B9DC3] text-sm hover:text-white">← 목록</button>
+          <span className="text-xs sm:text-sm text-[#C9A84C]">{WL[sermon.worshipType]} · {dateStr}</span>
           <div className="w-12" />
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
         {/* 성경 본문 */}
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 sm:p-5 mb-5">
-          <span className="text-blue-600 font-semibold text-sm">📖 {sermon.scripture}</span>
+        <div className="bg-[#0F1A2E] rounded-2xl p-5 sm:p-6 mb-6">
+          <span className="text-[#C9A84C] font-semibold text-sm">📖 {sermon.scripture}</span>
           {sermon.scriptureText ? (
-            <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line border-l-4 border-blue-300 pl-3 mt-2">{sermon.scriptureText}</div>
+            <div className="text-sm text-[#D1D5DB] leading-relaxed whitespace-pre-line border-l-2 border-[#C9A84C]/40 pl-3 mt-3">{sermon.scriptureText}</div>
           ) : (
-            <p className="text-sm text-gray-500 italic mt-1">성경 원문은 새로 생성한 설교에서 표시됩니다.</p>
+            <p className="text-sm text-[#5A6F8C] italic mt-2">성경 원문은 새로 생성한 설교에서 표시됩니다.</p>
           )}
         </div>
 
@@ -311,14 +311,14 @@ ${sermon.conclusion}
         </div>
 
         {/* 액션 버튼 */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 mb-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-            <button onClick={handleSave} disabled={saving} className="py-2.5 rounded-lg text-sm font-semibold bg-green-600 text-white hover:bg-green-700 disabled:bg-green-300">
+            <button onClick={handleSave} disabled={saving} className="py-2.5 rounded-xl text-sm font-semibold bg-[#0F1A2E] text-white hover:bg-[#1B2D4A] disabled:bg-gray-300">
               {saving ? '저장중...' : '💾 저장'}
             </button>
-            <button onClick={handlePptPrompt} className="py-2.5 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700" title="AI PPT 제작용 프롬프트를 다운로드합니다. Gemini/GPT에 올려서 PPT를 만드세요.">PPT 프롬프트</button>
-            <button onClick={handlePdf} className="py-2.5 rounded-lg text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200">PDF</button>
-            <button onClick={() => setShowDelete(true)} className="py-2.5 rounded-lg text-sm text-red-500 border border-red-200 hover:bg-red-50">삭제</button>
+            <button onClick={handlePptPrompt} className="py-2.5 rounded-xl text-sm font-semibold bg-[#C9A84C] text-[#0F1A2E] hover:bg-[#D4B85C]" title="Gemini/GPT에서 PPT를 만드세요">PPT 프롬프트</button>
+            <button onClick={handlePdf} className="py-2.5 rounded-xl text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200">PDF</button>
+            <button onClick={() => setShowDelete(true)} className="py-2.5 rounded-xl text-sm text-red-500 border border-red-200 hover:bg-red-50">삭제</button>
           </div>
           {regenLoading ? (
             <div className="w-full py-4 rounded-lg bg-purple-50 border border-purple-200 text-center">
@@ -333,7 +333,7 @@ ${sermon.conclusion}
             </div>
           ) : (
             <button onClick={handleFinalReview} disabled={sermon.regenerationCount >= 5}
-              className="w-full py-3 rounded-lg text-sm font-semibold bg-purple-600 text-white hover:bg-purple-700 disabled:bg-purple-300">
+              className="w-full py-3 rounded-xl text-sm font-semibold bg-[#0F1A2E] text-[#C9A84C] hover:bg-[#1B2D4A] disabled:bg-gray-300 disabled:text-gray-500 border border-[#C9A84C]/30">
               🔍 AI 최종검토
             </button>
           )}
@@ -364,8 +364,8 @@ ${sermon.conclusion}
         )}
 
         <div className="flex gap-3">
-          <button onClick={() => router.push('/sermons/new')} className="flex-1 py-3 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700">새 설교</button>
-          <button onClick={() => router.push('/home')} className="px-6 py-3 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200">홈</button>
+          <button onClick={() => router.push('/sermons/new')} className="flex-1 py-3 rounded-xl font-semibold bg-[#C9A84C] text-[#0F1A2E] hover:bg-[#D4B85C]">새 설교</button>
+          <button onClick={() => router.push('/home')} className="px-6 py-3 rounded-xl text-gray-700 bg-white border border-gray-200 hover:bg-gray-50">홈</button>
         </div>
       </main>
 

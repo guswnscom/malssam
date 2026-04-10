@@ -29,12 +29,12 @@ export default function SermonsListPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+    <div className="min-h-screen bg-[#FAFAF8]">
+      <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <button onClick={() => router.push('/home')} className="text-gray-500 hover:text-gray-700">← 홈</button>
-          <h1 className="text-lg font-semibold">설교 목록</h1>
-          <button onClick={() => router.push('/sermons/new')} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+          <button onClick={() => router.push('/home')} className="text-[#8B9DC3] hover:text-white">← 홈</button>
+          <h1 className="text-lg font-semibold text-white">설교 목록</h1>
+          <button onClick={() => router.push('/sermons/new')} className="bg-[#C9A84C] text-[#0F1A2E] px-4 py-2 rounded-xl text-sm font-bold hover:bg-[#D4B85C]">
             + 새 설교
           </button>
         </div>
@@ -57,14 +57,14 @@ export default function SermonsListPage() {
               <button
                 key={s.id}
                 onClick={() => router.push(`/sermons/${s.id}`)}
-                className="w-full text-left bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-sm hover:border-blue-200 hover:shadow-md transition-all"
+                className="w-full text-left bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm hover:border-[#C9A84C]/30 hover:shadow-md transition-all"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <h3 className="font-medium text-gray-900 truncate">{s.title}</h3>
                     <p className="text-sm text-gray-500 mt-1">📖 {s.scripture}</p>
                   </div>
-                  <span className="flex-shrink-0 bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
+                  <span className="flex-shrink-0 bg-[#0F1A2E] text-[#C9A84C] text-xs px-2.5 py-1 rounded-lg font-medium">
                     {WORSHIP_LABEL[s.worshipType] || s.worshipType}
                   </span>
                 </div>

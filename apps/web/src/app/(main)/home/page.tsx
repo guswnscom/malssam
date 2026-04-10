@@ -146,8 +146,10 @@ export default function HomePage() {
 
         {/* 절기/이벤트 알림 */}
         {upcomingEvents.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-            <h3 className="text-sm font-semibold text-amber-800 mb-2">📅 다가오는 교회 일정</h3>
+          <div className="bg-[#FFF8E7] border border-[#C9A84C]/20 rounded-2xl p-5">
+            <h3 className="text-sm font-semibold text-[#8B6914] mb-3 flex items-center gap-2">
+              <span className="w-1 h-4 bg-[#C9A84C] rounded-full" />다가오는 교회 일정
+            </h3>
             <div className="flex flex-wrap gap-2">
               {upcomingEvents.map((e, i) => (
                 <button
@@ -158,7 +160,7 @@ export default function HomePage() {
                       router.push(`/sermons/new?scripture=${encodeURIComponent(e.scripture)}&hint=${encodeURIComponent(e.label)}`);
                     }
                   }}
-                  className="inline-flex items-center gap-1.5 bg-white border border-amber-200 px-3 py-1.5 rounded-lg text-sm hover:bg-amber-100 hover:border-amber-300 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 bg-white border border-[#C9A84C]/20 px-3 py-2 rounded-xl text-sm hover:bg-[#FFF3D6] hover:border-[#C9A84C]/40 transition-all cursor-pointer shadow-sm"
                 >
                   <span className="text-amber-600 font-medium">{new Date(e.date).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
                   <span className="text-gray-700">{e.label}</span>
@@ -172,7 +174,7 @@ export default function HomePage() {
 
         {/* 이번주 예배 */}
         <section>
-          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">이번주 예배</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2"><span className="w-1 h-4 bg-[#0F1A2E] rounded-full" />이번주 예배</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {churchData.profile.worshipTypes.map((type) => {
               // 해당 예배 유형의 최근 설교 찾기
@@ -200,7 +202,7 @@ export default function HomePage() {
               }
 
               return (
-                <div key={type} className="bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                <div key={type} className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-[#C9A84C]/20 transition-all">
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900">{WORSHIP_LABEL[type] || type}</h3>
@@ -209,7 +211,7 @@ export default function HomePage() {
                     {matchingSermon ? (
                       <button
                         onClick={() => router.push(`/sermons/${matchingSermon.id}`)}
-                        className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-green-700 transition-colors flex-shrink-0"
+                        className="bg-[#0F1A2E] text-white px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium hover:bg-[#1B2D4A] transition-colors flex-shrink-0"
                       >
                         보기
                       </button>
@@ -224,7 +226,7 @@ export default function HomePage() {
                           const dateStr2 = nextDate.toISOString().split('T')[0];
                           router.push(`/sermons/new?worshipType=${type}&date=${dateStr2}`);
                         }}
-                        className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors flex-shrink-0"
+                        className="bg-[#C9A84C] text-[#0F1A2E] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold hover:bg-[#D4B85C] transition-colors flex-shrink-0"
                       >
                         설교 만들기
                       </button>
@@ -240,7 +242,7 @@ export default function HomePage() {
         {recentSermons.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900">최근 설교</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2"><span className="w-1 h-4 bg-[#0F1A2E] rounded-full" />최근 설교</h2>
               <button onClick={() => router.push('/sermons')} className="text-sm text-blue-600 hover:text-blue-800 font-medium">
                 전체 보기 →
               </button>
@@ -250,7 +252,7 @@ export default function HomePage() {
                 <button
                   key={s.id}
                   onClick={() => router.push(`/sermons/${s.id}`)}
-                  className="w-full text-left bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:border-blue-200 hover:shadow-md transition-all"
+                  className="w-full text-left bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:border-[#C9A84C]/30 hover:shadow-md transition-all"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
@@ -272,28 +274,28 @@ export default function HomePage() {
 
         {/* 빠른 작업 */}
         <section>
-          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">빠른 작업</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <button onClick={() => router.push('/sermons/new')} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-shadow">
-              <span className="text-2xl block mb-1">✍️</span>
-              <span className="text-sm font-medium text-gray-700">새 설교</span>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2"><span className="w-1 h-4 bg-[#0F1A2E] rounded-full" />빠른 작업</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <button onClick={() => router.push('/sermons/new')} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all">
+              <div className="w-10 h-10 bg-[#FFF8E7] rounded-xl flex items-center justify-center mx-auto mb-2"><span className="text-lg">✍️</span></div>
+              <span className="text-xs font-medium text-gray-700">새 설교</span>
             </button>
-            <button onClick={() => router.push('/sermons')} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-shadow">
-              <span className="text-2xl block mb-1">📋</span>
-              <span className="text-sm font-medium text-gray-700">설교 목록</span>
+            <button onClick={() => router.push('/sermons')} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all">
+              <div className="w-10 h-10 bg-[#EFF6FF] rounded-xl flex items-center justify-center mx-auto mb-2"><span className="text-lg">📋</span></div>
+              <span className="text-xs font-medium text-gray-700">설교 목록</span>
             </button>
-            <button onClick={() => router.push('/sermons/analyze')} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-shadow">
-              <span className="text-2xl block mb-1">🔍</span>
-              <span className="text-sm font-medium text-gray-700">설교 분석</span>
+            <button onClick={() => router.push('/sermons/analyze')} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all">
+              <div className="w-10 h-10 bg-[#F0FDF4] rounded-xl flex items-center justify-center mx-auto mb-2"><span className="text-lg">🔍</span></div>
+              <span className="text-xs font-medium text-gray-700">설교 분석</span>
             </button>
-            <button onClick={() => router.push('/calendar')} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-shadow">
-              <span className="text-2xl block mb-1">📅</span>
-              <span className="text-sm font-medium text-gray-700">캘린더</span>
+            <button onClick={() => router.push('/calendar')} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all">
+              <div className="w-10 h-10 bg-[#FDF2F8] rounded-xl flex items-center justify-center mx-auto mb-2"><span className="text-lg">📅</span></div>
+              <span className="text-xs font-medium text-gray-700">캘린더</span>
             </button>
             {membership.role === 'CHURCH_ADMIN' && (
-              <button onClick={() => router.push('/billing')} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-shadow">
-                <span className="text-2xl block mb-1">💳</span>
-                <span className="text-sm font-medium text-gray-700">결제 관리</span>
+              <button onClick={() => router.push('/billing')} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all">
+                <div className="w-10 h-10 bg-[#FFFBEB] rounded-xl flex items-center justify-center mx-auto mb-2"><span className="text-lg">💳</span></div>
+                <span className="text-xs font-medium text-gray-700">결제 관리</span>
               </button>
             )}
           </div>
