@@ -30,8 +30,11 @@ export default function SermonsListPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
+      <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4 relative overflow-hidden">
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 opacity-[0.05]">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="#C9A84C"><path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z"/></svg>
+        </div>
+        <div className="max-w-3xl mx-auto flex items-center justify-between relative">
           <button onClick={() => router.push('/home')} className="text-[#8B9DC3] hover:text-white">← 홈</button>
           <h1 className="text-lg font-semibold text-white">설교 목록</h1>
           <button onClick={() => router.push('/sermons/new')} className="bg-[#C9A84C] text-[#0F1A2E] px-4 py-2 rounded-xl text-sm font-bold hover:bg-[#D4B85C]">

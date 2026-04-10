@@ -105,8 +105,12 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* 상단 바 */}
-      <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4 relative overflow-hidden">
+        {/* 중앙 십자가 장식 */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 opacity-[0.06]">
+          <svg width="120" height="120" viewBox="0 0 24 24" fill="#C9A84C"><path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z"/></svg>
+        </div>
+        <div className="max-w-4xl mx-auto flex items-center justify-between relative">
           <div>
             <h1 className="text-lg sm:text-xl font-bold text-white">{church.name}</h1>
             <p className="text-xs sm:text-sm text-[#8B9DC3]">{ROLE_LABEL[membership.role] || membership.role}</p>
@@ -146,14 +150,15 @@ export default function HomePage() {
 
         {/* 절기/이벤트 알림 */}
         {upcomingEvents.length > 0 && (
-          <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/20">
-            {/* 좌측: 숲/나뭇잎 배경 */}
-            <div className="absolute inset-0 opacity-[0.12]" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=50)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
-            {/* 우측: 성경책 이미지 */}
-            <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-[0.15]" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=400&q=50)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
-            {/* 그라데이션 오버레이 */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7]/95 via-[#FFF8E7]/90 to-[#FFF8E7]/70" />
-            <div className="relative p-5 sm:p-6">
+          <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/20 min-h-[140px]">
+            {/* 배경 그라데이션 */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF3D6] to-[#F5E6C8]" />
+            {/* 우측 십자가+성경 이미지 */}
+            <div className="absolute right-0 top-0 bottom-0 w-2/5 sm:w-1/3">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] to-transparent z-10" />
+              <img src="https://images.unsplash.com/photo-1507692049790-de58290a4334?w=400&q=60" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+            </div>
+            <div className="relative p-5 sm:p-6 z-20">
             <h3 className="text-sm font-semibold text-[#8B6914] mb-3 flex items-center gap-2">
               <span className="w-1 h-4 bg-[#C9A84C] rounded-full" />다가오는 교회 일정
             </h3>

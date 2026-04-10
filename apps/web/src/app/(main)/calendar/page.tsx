@@ -79,13 +79,16 @@ export default function CalendarPage() {
   const isToday = (d: number) => d === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear();
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <button onClick={() => router.push('/home')} className="text-gray-500">← 홈</button>
-          <h1 className="text-lg font-semibold">교회 캘린더</h1>
+    <div className="min-h-screen">
+      <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4 relative overflow-hidden">
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 opacity-[0.05]">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="#C9A84C"><path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z"/></svg>
+        </div>
+        <div className="max-w-4xl mx-auto flex items-center justify-between relative">
+          <button onClick={() => router.push('/home')} className="text-[#8B9DC3] hover:text-white">← 홈</button>
+          <h1 className="text-lg font-semibold text-white">교회 캘린더</h1>
           <button onClick={() => { setShowAdd(true); setNewEvent(prev => ({ ...prev, date: selectedDate || getDateStr(today.getDate()) })); }}
-            className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700">
+            className="bg-[#C9A84C] text-[#0F1A2E] px-3 py-1.5 rounded-xl text-sm font-bold hover:bg-[#D4B85C]">
             + 일정 추가
           </button>
         </div>
@@ -94,17 +97,17 @@ export default function CalendarPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
         {/* 월 네비게이션 */}
         <div className="flex items-center justify-between mb-6">
-          <button onClick={prevMonth} className="text-gray-500 hover:text-gray-700 text-lg px-3">◀</button>
-          <h2 className="text-xl font-bold text-gray-900">{year}년 {month}월</h2>
-          <button onClick={nextMonth} className="text-gray-500 hover:text-gray-700 text-lg px-3">▶</button>
+          <button onClick={prevMonth} className="w-10 h-10 rounded-xl bg-white/80 border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-[#C9A84C] hover:text-white hover:border-[#C9A84C] transition-all">◀</button>
+          <h2 className="heading-serif text-xl font-bold text-gray-900">{year}년 {month}월</h2>
+          <button onClick={nextMonth} className="w-10 h-10 rounded-xl bg-white/80 border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-[#C9A84C] hover:text-white hover:border-[#C9A84C] transition-all">▶</button>
         </div>
 
         {/* 달력 그리드 */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-[#C9A84C]/10 shadow-sm overflow-hidden mb-6">
           {/* 요일 헤더 */}
-          <div className="grid grid-cols-7 bg-gray-50">
+          <div className="grid grid-cols-7 bg-[#0F1A2E]">
             {DAYS.map((d, i) => (
-              <div key={d} className={`py-2 text-center text-xs font-medium ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-500' : 'text-gray-500'}`}>{d}</div>
+              <div key={d} className={`py-2.5 text-center text-xs font-medium ${i === 0 ? 'text-red-300' : i === 6 ? 'text-blue-300' : 'text-[#C9A84C]'}`}>{d}</div>
             ))}
           </div>
           {/* 날짜 */}
@@ -118,10 +121,10 @@ export default function CalendarPage() {
                   onClick={() => { setSelectedDate(getDateStr(day)); }}
                   className={`min-h-[80px] sm:min-h-[100px] border-t border-r border-gray-100 p-1 cursor-pointer hover:bg-blue-50 transition-colors ${
                     isToday(day) ? 'bg-blue-50' : ''
-                  } ${selectedDate === getDateStr(day) ? 'ring-2 ring-blue-400 ring-inset' : ''}`}
+                  } ${selectedDate === getDateStr(day) ? 'ring-2 ring-[#C9A84C] ring-inset bg-[#FFF8E7]' : ''}`}
                 >
                   <span className={`text-xs sm:text-sm font-medium ${
-                    isToday(day) ? 'bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center' :
+                    isToday(day) ? 'bg-[#C9A84C] text-white rounded-full w-7 h-7 flex items-center justify-center shadow-md' :
                     dayOfWeek === 0 ? 'text-red-500' : dayOfWeek === 6 ? 'text-blue-500' : 'text-gray-700'
                   }`}>
                     {day}
@@ -146,8 +149,10 @@ export default function CalendarPage() {
 
         {/* 선택된 날짜의 일정 */}
         {selectedDate && (
-          <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-3">{selectedDate} 일정</h3>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-[#C9A84C]/10 shadow-sm p-5 mb-6">
+            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-1 h-4 bg-[#C9A84C] rounded-full" />{selectedDate} 일정
+            </h3>
             {(() => {
               const d = parseInt(selectedDate.split('-')[2]);
               const { custom, lit } = getEventsForDay(d);
@@ -186,7 +191,7 @@ export default function CalendarPage() {
               );
             })()}
             <button onClick={() => { setShowAdd(true); setNewEvent(prev => ({ ...prev, date: selectedDate })); }}
-              className="mt-3 w-full py-2 rounded-lg text-sm text-blue-600 border border-blue-200 hover:bg-blue-50">
+              className="mt-3 w-full py-2.5 rounded-xl text-sm text-[#C9A84C] border border-[#C9A84C]/30 hover:bg-[#FFF8E7] font-medium transition-colors">
               + 이 날짜에 일정 추가
             </button>
           </div>
@@ -196,8 +201,11 @@ export default function CalendarPage() {
       {/* 일정 추가 모달 */}
       {showAdd && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="font-semibold text-lg mb-4">새 일정 추가</h3>
+          <div className="bg-[#FAFAF8] rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto border border-[#C9A84C]/20 shadow-2xl">
+            <h3 className="heading-serif text-lg mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-[#C9A84C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+              새 일정 추가
+            </h3>
 
             <div className="space-y-4">
               <div>
@@ -256,9 +264,9 @@ export default function CalendarPage() {
                             : [...prev.reminderDays, opt.value],
                         }));
                       }}
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                         newEvent.reminderDays.includes(opt.value)
-                          ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-[#0F1A2E] text-[#C9A84C]' : 'bg-white border border-gray-200 text-gray-700 hover:border-[#C9A84C]/30'
                       }`}>
                       {opt.label}
                     </button>
@@ -268,8 +276,8 @@ export default function CalendarPage() {
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button onClick={handleAdd} className="flex-1 py-2.5 rounded-lg bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700">추가</button>
-              <button onClick={() => setShowAdd(false)} className="flex-1 py-2.5 rounded-lg bg-gray-100 text-gray-700 text-sm hover:bg-gray-200">취소</button>
+              <button onClick={handleAdd} className="flex-1 py-2.5 rounded-xl bg-[#C9A84C] text-[#0F1A2E] font-bold text-sm hover:bg-[#D4B85C]">추가</button>
+              <button onClick={() => setShowAdd(false)} className="flex-1 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-sm hover:bg-gray-50">취소</button>
             </div>
           </div>
         </div>
