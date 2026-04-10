@@ -105,8 +105,11 @@ export class AiService {
         if (attempt === maxRetries) {
           throw error;
         }
-        // 재시도 전 1초 대기
-        await new Promise((r) => setTimeout(r, 1000));
+        // 과부하 시 지수 백오프: 3초, 6초, 12초
+        const isOverloaded = error.status === 529 || error.message?.includes('overloaded');
+        const delay = isOverloaded ? 3000 * Math.pow(2, attempt) : 2000;
+        this.logger.log(`${delay / 1000}초 후 재시도...`);
+        await new Promise((r) => setTimeout(r, delay));
       }
     }
 
@@ -115,7 +118,7 @@ export class AiService {
 
   async regenerateSermon(
     regenPrompt: string,
-    maxRetries = 1,
+    maxRetries = 3,
   ): Promise<{ output: SermonOutput; tokensUsed: number }> {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
@@ -140,8 +143,12 @@ export class AiService {
         return { output, tokensUsed };
       } catch (error: any) {
         this.logger.error(`재생성 실패 (시도 ${attempt + 1}): ${error.message}`);
+        const isOverloaded = error.status === 529 || error.message?.includes('overloaded');
         if (attempt === maxRetries) throw error;
-        await new Promise((r) => setTimeout(r, 1000));
+        // 과부하 시 지수 백오프: 3초, 6초, 12초 대기
+        const delay = isOverloaded ? 3000 * Math.pow(2, attempt) : 2000;
+        this.logger.log(`${delay / 1000}초 후 재시도...`);
+        await new Promise((r) => setTimeout(r, delay));
       }
     }
     throw new Error('재생성에 실패했습니다');
