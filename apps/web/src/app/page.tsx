@@ -78,47 +78,60 @@ export default function LandingPage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4">
             요금제
           </h2>
-          <p className="text-center text-gray-500 mb-12">
-            교회 하나가 결제하면, 모든 목회자가 함께 사용합니다
+          <p className="text-center text-gray-500 mb-4">
+            처음 5편은 무료! 필요한 만큼만 결제하세요
+          </p>
+          <p className="text-center text-sm text-gray-400 mb-12">
+            목회자 수 제한 없음 · 모든 기능 포함
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* 새싹 */}
-            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 text-center">
-              <h3 className="font-bold text-lg text-gray-900">새싹</h3>
-              <p className="text-3xl sm:text-4xl font-bold mt-3 text-gray-900">월 5만원</p>
-              <p className="text-sm text-gray-500 mt-1">30명 이하 교회</p>
-              <ul className="text-sm text-gray-600 mt-6 space-y-3 text-left">
-                <li className="flex items-center gap-2"><span className="text-green-500">&#10003;</span> 목회자 3명</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">&#10003;</span> 설교 생성 월 20회</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">&#10003;</span> PDF · PPT 출력</li>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {/* 무료 */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-green-200 text-center">
+              <h3 className="font-bold text-base text-gray-900">무료</h3>
+              <p className="text-2xl sm:text-3xl font-bold mt-2 text-green-600">0원</p>
+              <p className="text-xs text-gray-500 mt-1">처음 시작</p>
+              <p className="text-sm text-gray-600 mt-4 font-medium">설교 5편</p>
+              <ul className="text-xs text-gray-500 mt-3 space-y-1 text-left">
+                <li>&#10003; PPT · PDF 출력</li>
+                <li>&#10003; 설교 분석</li>
               </ul>
             </div>
 
-            {/* 성장 (추천) */}
-            <div className="bg-white p-6 sm:p-8 rounded-2xl border-2 border-blue-500 text-center relative shadow-lg">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs px-4 py-1.5 rounded-full font-medium">
-                추천
-              </span>
-              <h3 className="font-bold text-lg text-gray-900">성장</h3>
-              <p className="text-3xl sm:text-4xl font-bold mt-3 text-blue-600">월 10만원</p>
-              <p className="text-sm text-gray-500 mt-1">100명 이하 교회</p>
-              <ul className="text-sm text-gray-600 mt-6 space-y-3 text-left">
-                <li className="flex items-center gap-2"><span className="text-green-500">&#10003;</span> 목회자 5명</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">&#10003;</span> 설교 생성 월 50회</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">&#10003;</span> PDF · PPT 출력</li>
+            {/* 5편 */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200 text-center">
+              <h3 className="font-bold text-base text-gray-900">5편</h3>
+              <p className="text-2xl sm:text-3xl font-bold mt-2 text-gray-900">5만원</p>
+              <p className="text-xs text-gray-500 mt-1">약 1개월</p>
+              <p className="text-sm text-gray-600 mt-4 font-medium">설교 5편</p>
+              <ul className="text-xs text-gray-500 mt-3 space-y-1 text-left">
+                <li>&#10003; PPT · PDF 출력</li>
+                <li>&#10003; 설교 분석</li>
               </ul>
             </div>
 
-            {/* 열매 */}
-            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 text-center">
-              <h3 className="font-bold text-lg text-gray-900">열매</h3>
-              <p className="text-3xl sm:text-4xl font-bold mt-3 text-gray-900">월 18만원</p>
-              <p className="text-sm text-gray-500 mt-1">100명 이상 교회</p>
-              <ul className="text-sm text-gray-600 mt-6 space-y-3 text-left">
-                <li className="flex items-center gap-2"><span className="text-green-500">&#10003;</span> 목회자 10명</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">&#10003;</span> 설교 생성 무제한</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">&#10003;</span> PDF · PPT 출력</li>
+            {/* 10편 (추천) */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border-2 border-blue-500 text-center relative shadow-lg">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-medium">추천</span>
+              <h3 className="font-bold text-base text-gray-900">10편</h3>
+              <p className="text-2xl sm:text-3xl font-bold mt-2 text-blue-600">10만원</p>
+              <p className="text-xs text-gray-500 mt-1">약 2개월</p>
+              <p className="text-sm text-gray-600 mt-4 font-medium">설교 10편</p>
+              <ul className="text-xs text-gray-500 mt-3 space-y-1 text-left">
+                <li>&#10003; PPT · PDF 출력</li>
+                <li>&#10003; 설교 분석</li>
+              </ul>
+            </div>
+
+            {/* 20편 */}
+            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200 text-center">
+              <h3 className="font-bold text-base text-gray-900">20편</h3>
+              <p className="text-2xl sm:text-3xl font-bold mt-2 text-gray-900">20만원</p>
+              <p className="text-xs text-gray-500 mt-1">약 4개월</p>
+              <p className="text-sm text-gray-600 mt-4 font-medium">설교 20편</p>
+              <ul className="text-xs text-gray-500 mt-3 space-y-1 text-left">
+                <li>&#10003; PPT · PDF 출력</li>
+                <li>&#10003; 설교 분석</li>
               </ul>
             </div>
           </div>
@@ -131,7 +144,7 @@ export default function LandingPage() {
           지금 바로 시작하세요
         </h2>
         <p className="text-gray-500 mb-8">
-          3개월 무료체험 · 카드 등록 없이 · 5분이면 첫 설교 완성
+          처음 5편 무료 · 카드 등록 없이 · 5분이면 첫 설교 완성
         </p>
         <a
           href="/signup"

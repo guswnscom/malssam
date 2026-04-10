@@ -87,7 +87,9 @@ export const PlanType = {
 export type PlanType = (typeof PlanType)[keyof typeof PlanType];
 
 export const PLAN_CONFIG = {
-  SEED:   { price: 50000,  maxPastors: 3,  maxSermons: 20,  label: '새싹' },
-  GROWTH: { price: 100000, maxPastors: 5,  maxSermons: 50,  label: '성장' },
-  FRUIT:  { price: 180000, maxPastors: 10, maxSermons: -1,  label: '열매' },
+  FREE:   { price: 0,      maxPastors: -1, maxSermons: 5,   label: '무료' },
+  SEED:   { price: 50000,  maxPastors: -1, maxSermons: 5,   label: '5편' },
+  GROWTH: { price: 100000, maxPastors: -1, maxSermons: 10,  label: '10편' },
+  STANDARD: { price: 200000, maxPastors: -1, maxSermons: 20, label: '20편' },
+  PREMIUM:  { price: 300000, maxPastors: -1, maxSermons: 30, label: '30편' },
 } as const;

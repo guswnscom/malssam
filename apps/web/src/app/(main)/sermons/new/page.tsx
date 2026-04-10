@@ -124,6 +124,13 @@ function NewSermonPage() {
         </div>
       </header>
 
+      {/* 안내문 */}
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4">
+        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-blue-700 leading-relaxed">
+          📌 이 앱은 목사님의 설교 준비를 돕는 보조 도구입니다. 최종 설교문은 반드시 목사님께서 직접 검토 및 수정하여 사용하시기 바랍니다.
+        </div>
+      </div>
+
       {/* 스텝 인디케이터 */}
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-6">
         <div className="flex items-center justify-center gap-2 mb-8">

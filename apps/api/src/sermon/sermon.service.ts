@@ -166,7 +166,16 @@ export class SermonService {
 
     const regenPrompt = buildRegenerationPrompt(originalDraft, dto.feedback, dto.targetSection);
 
-    const { output, tokensUsed } = await this.ai.regenerateSermon(regenPrompt);
+    let output: any;
+    let tokensUsed: number;
+    try {
+      const result = await this.ai.regenerateSermon(regenPrompt);
+      output = result.output;
+      tokensUsed = result.tokensUsed;
+    } catch (error: any) {
+      this.logger.error(`재생성 AI 호출 실패: ${error.message}`);
+      throw new ForbiddenException(`AI 수정 요청에 실패했습니다. 잠시 후 다시 시도해주세요. (${error.message?.substring(0, 50)})`);
+    }
 
     const updated = await this.prisma.sermonDraft.update({
       where: { id: sermonId },
