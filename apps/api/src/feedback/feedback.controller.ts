@@ -30,4 +30,16 @@ export class FeedbackController {
   async getStats(@Request() req: any) {
     return this.feedbackService.getUserStats(req.user.sub);
   }
+
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard)
+  async getAllFeedbacks() {
+    return this.feedbackService.getAllFeedbacks();
+  }
+
+  @Get('admin/stats')
+  @UseGuards(JwtAuthGuard)
+  async getAdminStats() {
+    return this.feedbackService.getAdminStats();
+  }
 }
