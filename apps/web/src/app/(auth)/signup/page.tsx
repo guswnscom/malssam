@@ -9,7 +9,7 @@ import { useAuthStore } from '@/stores/auth-store';
 export default function SignupPage() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', title: '목사' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -17,7 +17,7 @@ export default function SignupPage() {
     e.preventDefault();
     setError(''); setLoading(true);
     try {
-      const { data } = await api.post('/auth/signup', form);
+      const { data } = await api.post('/auth/signup', { ...form, name: `${form.name}|${form.title}` });
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       setAuth(data.user);
@@ -59,6 +59,17 @@ export default function SignupPage() {
                 className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-[#C9A84C]/30 focus:border-[#C9A84C] outline-none text-sm"
                 placeholder="이름을 입력하세요"
                 value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">호칭</label>
+              <div className="grid grid-cols-3 gap-2">
+                {['목사', '부목사', '전도사'].map(t => (
+                  <button key={t} type="button" onClick={() => setForm({ ...form, title: t })}
+                    className={`py-2.5 rounded-xl text-sm font-medium transition-all ${form.title === t ? 'bg-[#0F1A2E] text-[#C9A84C]' : 'bg-white border border-gray-200 text-gray-700 hover:border-[#C9A84C]/30'}`}>
+                    {t}
+                  </button>
+                ))}
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">이메일</label>

@@ -102,18 +102,37 @@ export default function HomePage() {
   const { church, subscription, membership } = churchData;
   const upcomingEvents = getUpcomingEvents();
 
+  const TAG_COLORS: Record<string, string> = {
+    SUNDAY: 'bg-[#C9A84C] text-white',
+    WEDNESDAY: 'bg-[#3B82F6] text-white',
+    FRIDAY: 'bg-[#8B5CF6] text-white',
+    DAWN: 'bg-[#F59E0B] text-white',
+    SPECIAL: 'bg-[#EC4899] text-white',
+  };
+
   return (
     <div className="min-h-screen">
       {/* 상단 바 */}
       <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4 relative overflow-hidden">
-        {/* 중앙 십자가 장식 */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 opacity-[0.06]">
-          <svg width="120" height="120" viewBox="0 0 24 24" fill="#C9A84C"><path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z"/></svg>
+        {/* 중앙 십자가 장식 — 선명하게 */}
+        <div className="absolute left-1/2 -translate-x-1/2 -top-2 opacity-[0.15]">
+          <svg width="160" height="160" viewBox="0 0 24 24" fill="#C9A84C"><path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z"/></svg>
         </div>
         <div className="max-w-4xl mx-auto flex items-center justify-between relative">
           <div>
             <h1 className="text-lg sm:text-xl font-bold text-white">{church.name}</h1>
-            <p className="text-xs sm:text-sm text-[#8B9DC3]">{ROLE_LABEL[membership.role] || membership.role}</p>
+            <p className="text-xs sm:text-sm text-[#8B9DC3]">
+              {(() => {
+                const me = useAuthStore.getState().user;
+                if (me?.name) {
+                  const parts = me.name.split('|');
+                  const name = parts[0];
+                  const title = parts[1] || '목사';
+                  return `${name} ${title}님 (${ROLE_LABEL[membership.role] || '관리자'})`;
+                }
+                return ROLE_LABEL[membership.role] || membership.role;
+              })()}
+            </p>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             {subscription.status === 'trial' && (
@@ -153,10 +172,10 @@ export default function HomePage() {
           <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/20 min-h-[140px]">
             {/* 배경 그라데이션 */}
             <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF3D6] to-[#F5E6C8]" />
-            {/* 우측 십자가+성경 이미지 */}
+            {/* 우측 십자가+성경 이미지 — 선명하게 */}
             <div className="absolute right-0 top-0 bottom-0 w-2/5 sm:w-1/3">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] to-transparent z-10" />
-              <img src="https://images.unsplash.com/photo-1507692049790-de58290a4334?w=400&q=60" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF8E7]/60 to-transparent z-10" />
+              <img src="https://images.unsplash.com/photo-1507692049790-de58290a4334?w=600&q=80" alt="" className="absolute inset-0 w-full h-full object-cover opacity-70" />
             </div>
             <div className="relative p-5 sm:p-6 z-20">
             <h3 className="text-sm font-semibold text-[#8B6914] mb-3 flex items-center gap-2">
@@ -285,7 +304,7 @@ export default function HomePage() {
                       <h3 className="font-semibold text-gray-900 truncate">{s.title} <span className="text-[#C9A84C]">✝</span></h3>
                       <p className="text-sm text-gray-500 mt-0.5">📖 {s.scripture}</p>
                     </div>
-                    <span className="flex-shrink-0 bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
+                    <span className={`flex-shrink-0 text-xs px-2.5 py-1 rounded-lg font-medium ${TAG_COLORS[s.worshipType] || 'bg-gray-200 text-gray-700'}`}>
                       {WORSHIP_LABEL[s.worshipType] || s.worshipType}
                     </span>
                   </div>

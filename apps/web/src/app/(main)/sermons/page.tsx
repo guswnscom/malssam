@@ -14,6 +14,10 @@ interface SermonItem {
   createdAt: string;
 }
 
+const TAG_COLORS: Record<string, string> = {
+  SUNDAY: 'bg-[#C9A84C] text-white', WEDNESDAY: 'bg-[#3B82F6] text-white',
+  FRIDAY: 'bg-[#8B5CF6] text-white', DAWN: 'bg-[#F59E0B] text-white', SPECIAL: 'bg-[#EC4899] text-white',
+};
 const WORSHIP_LABEL: Record<string, string> = {
   SUNDAY: '주일예배', WEDNESDAY: '수요예배', FRIDAY: '금요예배',
   DAWN: '새벽예배', SPECIAL: '특별예배',
@@ -67,7 +71,7 @@ export default function SermonsListPage() {
                     <h3 className="font-medium text-gray-900 truncate">{s.title}</h3>
                     <p className="text-sm text-gray-500 mt-1">📖 {s.scripture}</p>
                   </div>
-                  <span className="flex-shrink-0 bg-[#0F1A2E] text-[#C9A84C] text-xs px-2.5 py-1 rounded-lg font-medium">
+                  <span className={`flex-shrink-0 text-xs px-2.5 py-1 rounded-lg font-medium ${TAG_COLORS[s.worshipType] || 'bg-gray-200 text-gray-700'}`}>
                     {WORSHIP_LABEL[s.worshipType] || s.worshipType}
                   </span>
                 </div>

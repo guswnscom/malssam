@@ -5,11 +5,16 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 
 const WORSHIP_TYPES = [
-  { value: 'SUNDAY', label: '주일예배', icon: '✝', color: 'from-[#C9A84C] to-[#8B6914]' },
-  { value: 'WEDNESDAY', label: '수요예배', icon: '📖', color: 'from-[#3B82F6] to-[#1D4ED8]' },
-  { value: 'FRIDAY', label: '금요예배', icon: '🙏', color: 'from-[#8B5CF6] to-[#6D28D9]' },
-  { value: 'DAWN', label: '새벽예배', icon: '🕊', color: 'from-[#F59E0B] to-[#D97706]' },
-  { value: 'SPECIAL', label: '특별예배', icon: '✦', color: 'from-[#EC4899] to-[#BE185D]' },
+  { value: 'SUNDAY', label: '주일예배', color: 'from-[#C9A84C] to-[#8B6914]',
+    svg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 2v8m0 4v8m-6-14h12M6 18h12"/>' },
+  { value: 'WEDNESDAY', label: '수요예배', color: 'from-[#3B82F6] to-[#1D4ED8]',
+    svg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>' },
+  { value: 'FRIDAY', label: '금요예배', color: 'from-[#8B5CF6] to-[#6D28D9]',
+    svg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>' },
+  { value: 'DAWN', label: '새벽예배', color: 'from-[#F59E0B] to-[#D97706]',
+    svg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>' },
+  { value: 'SPECIAL', label: '특별예배', color: 'from-[#EC4899] to-[#BE185D]',
+    svg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>' },
 ];
 
 const DEPTHS = [
@@ -213,8 +218,8 @@ function NewSermonPage() {
                       : 'bg-white/80 border-2 border-gray-100 hover:border-[#C9A84C]/30 hover:shadow-md'
                   }`}
                 >
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2 bg-gradient-to-br ${w.color} shadow-lg`}>
-                    <span className="text-xl text-white">{w.icon}</span>
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 bg-gradient-to-br ${w.color} shadow-lg`}>
+                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: w.svg }} />
                   </div>
                   <span className={`text-sm font-semibold ${form.worshipType === w.value ? 'text-[#C9A84C]' : 'text-gray-700'}`}>{w.label}</span>
                 </button>
