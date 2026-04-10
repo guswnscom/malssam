@@ -114,22 +114,16 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* 상단 바 */}
       <header className="bg-[#0F1A2E] px-4 sm:px-6 py-5 sm:py-6 relative overflow-hidden">
-        {/* 배경 광선 효과 */}
-        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 50% 30%, #C9A84C 0%, transparent 50%)' }} />
-        {/* 대형 십자가 장식 — 중앙 상단에 크고 선명하게 */}
-        <div className="absolute left-1/2 -translate-x-1/2 -top-6 sm:-top-4">
-          <svg width="220" height="220" viewBox="0 0 100 100" fill="none" className="opacity-[0.12]">
-            {/* 메인 십자가 */}
-            <rect x="42" y="5" width="16" height="90" rx="2" fill="#C9A84C"/>
-            <rect x="15" y="30" width="70" height="16" rx="2" fill="#C9A84C"/>
-            {/* 십자가 내부 하이라이트 */}
-            <rect x="46" y="9" width="8" height="82" rx="1" fill="#C9A84C" opacity="0.3"/>
-            <rect x="19" y="34" width="62" height="8" rx="1" fill="#C9A84C" opacity="0.3"/>
+        {/* 골드 광선 — 십자가 뒤 빛 퍼짐 효과 */}
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 60% 80% at 50% 40%, rgba(201,168,76,0.15) 0%, rgba(201,168,76,0.05) 30%, transparent 70%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 30% 60% at 50% 40%, rgba(255,248,230,0.08) 0%, transparent 50%)' }} />
+        {/* 중앙 십자가 — 골드 글로우 */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
+          <svg width="60" height="60" viewBox="0 0 100 100" fill="none" style={{ filter: 'drop-shadow(0 0 15px rgba(201,168,76,0.4)) drop-shadow(0 0 30px rgba(201,168,76,0.2))' }}>
+            <rect x="44" y="8" width="12" height="84" rx="1.5" fill="#C9A84C" opacity="0.7"/>
+            <rect x="18" y="32" width="64" height="12" rx="1.5" fill="#C9A84C" opacity="0.7"/>
           </svg>
         </div>
-        {/* 좌우 장식 라인 */}
-        <div className="absolute top-1/2 left-4 sm:left-8 -translate-y-1/2 w-12 sm:w-20 h-[1px] bg-gradient-to-r from-transparent to-[#C9A84C]/20" />
-        <div className="absolute top-1/2 right-4 sm:right-8 -translate-y-1/2 w-12 sm:w-20 h-[1px] bg-gradient-to-l from-transparent to-[#C9A84C]/20" />
         <div className="max-w-4xl mx-auto flex items-center justify-between relative">
           <div>
             <h1 className="text-lg sm:text-xl font-bold text-white">{church.name}</h1>
@@ -184,10 +178,10 @@ export default function HomePage() {
           <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/20 min-h-[140px]">
             {/* 배경 그라데이션 */}
             <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF3D6] to-[#F5E6C8]" />
-            {/* 우측 십자가+성경 이미지 — 선명하게 */}
+            {/* 우측 십자가+성경 이미지 — 고화질 */}
             <div className="absolute right-0 top-0 bottom-0 w-2/5 sm:w-1/3">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF8E7]/60 to-transparent z-10" />
-              <img src="https://images.unsplash.com/photo-1507692049790-de58290a4334?w=600&q=80" alt="" className="absolute inset-0 w-full h-full object-cover opacity-70" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF8E7]/50 to-transparent z-10" />
+              <img src="https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=1200&q=90&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />
             </div>
             <div className="relative p-5 sm:p-6 z-20">
             <h3 className="text-sm font-semibold text-[#8B6914] mb-3 flex items-center gap-2">
