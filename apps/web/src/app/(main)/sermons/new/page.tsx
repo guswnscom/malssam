@@ -166,8 +166,9 @@ function NewSermonPage() {
 
       {/* 안내문 */}
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4">
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-blue-700 leading-relaxed">
-          📌 이 앱은 목사님의 설교 준비를 돕는 보조 도구입니다. 최종 설교문은 반드시 목사님께서 직접 검토 및 수정하여 사용하시기 바랍니다.
+        <div className="bg-[#0F1A2E] rounded-2xl p-4 flex items-start gap-3">
+          <svg className="w-5 h-5 text-[#C9A84C] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <p className="text-xs text-[#8B9DC3] leading-relaxed">이 도구는 목사님의 설교 준비를 돕는 AI 보조 도구입니다. 최종 설교문은 반드시 직접 검토하시고 수정하여 사용해주세요.</p>
         </div>
       </div>
 

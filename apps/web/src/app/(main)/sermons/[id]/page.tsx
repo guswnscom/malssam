@@ -325,8 +325,8 @@ ${sermon.conclusion}
               {saving ? '저장중...' : '💾 저장'}
             </button>
             <button onClick={handlePptPrompt} className="py-2.5 rounded-xl text-sm font-semibold bg-[#C9A84C] text-[#0F1A2E] hover:bg-[#D4B85C]" title="Gemini/GPT에서 PPT를 만드세요">PPT 프롬프트</button>
-            <button onClick={handlePdf} className="py-2.5 rounded-xl text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200">PDF</button>
-            <button onClick={() => setShowDelete(true)} className="py-2.5 rounded-xl text-sm text-red-500 border border-red-200 hover:bg-red-50">삭제</button>
+            <button onClick={handlePdf} className="py-2.5 rounded-xl text-sm font-semibold bg-[#EFF6FF] text-[#1E40AF] hover:bg-[#DBEAFE] border border-[#BFDBFE]">PDF</button>
+            <button onClick={() => setShowDelete(true)} className="py-2.5 rounded-xl text-sm font-medium bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] hover:bg-[#FEE2E2]">삭제</button>
           </div>
           {regenLoading ? (
             <div className="w-full py-4 rounded-lg bg-purple-50 border border-purple-200 text-center">

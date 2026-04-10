@@ -147,9 +147,13 @@ export default function HomePage() {
         {/* 절기/이벤트 알림 */}
         {upcomingEvents.length > 0 && (
           <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/20">
-            {/* 배경 이미지 */}
-            <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=800&q=60)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
-            <div className="relative bg-[#FFF8E7]/90 p-5">
+            {/* 좌측: 숲/나뭇잎 배경 */}
+            <div className="absolute inset-0 opacity-[0.12]" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=50)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+            {/* 우측: 성경책 이미지 */}
+            <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-[0.15]" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=400&q=50)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+            {/* 그라데이션 오버레이 */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7]/95 via-[#FFF8E7]/90 to-[#FFF8E7]/70" />
+            <div className="relative p-5 sm:p-6">
             <h3 className="text-sm font-semibold text-[#8B6914] mb-3 flex items-center gap-2">
               <span className="w-1 h-4 bg-[#C9A84C] rounded-full" />다가오는 교회 일정
             </h3>
@@ -179,7 +183,8 @@ export default function HomePage() {
         <section>
           <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2"><span className="w-1 h-4 bg-[#0F1A2E] rounded-full" />이번주 예배</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            {churchData.profile.worshipTypes.map((type) => {
+            {/* 순서: 주일→수요→금요→새벽→특별 */}
+            {['SUNDAY','WEDNESDAY','FRIDAY','DAWN','SPECIAL'].filter(t => churchData.profile.worshipTypes.includes(t)).map((type) => {
               // 해당 예배 유형의 최근 설교 찾기
               const matchingSermon = recentSermons.find(s => s.worshipType === type);
               const WORSHIP_DAY: Record<string, number> = { SUNDAY: 0, WEDNESDAY: 3, FRIDAY: 5, DAWN: 1, SPECIAL: 6 };
@@ -210,10 +215,17 @@ export default function HomePage() {
               }
 
               return (
-                <div key={type} className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-[#C9A84C]/20 transition-all">
+                <div key={type} className={`bg-white p-4 sm:p-5 rounded-2xl shadow-sm hover:shadow-md transition-all ${
+                  type === 'SUNDAY' ? 'border-l-4 border-l-[#C9A84C] border border-gray-100' :
+                  type === 'WEDNESDAY' ? 'border-l-4 border-l-[#3B82F6] border border-gray-100' :
+                  type === 'FRIDAY' ? 'border-l-4 border-l-[#8B5CF6] border border-gray-100' :
+                  type === 'DAWN' ? 'border-l-4 border-l-[#F59E0B] border border-gray-100' :
+                  type === 'SPECIAL' ? 'border-l-4 border-l-[#EC4899] border border-gray-100' :
+                  'border border-gray-100'
+                }`}>
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900">{WORSHIP_LABEL[type] || type}</h3>
+                      <h3 className="font-medium text-gray-900">{WORSHIP_LABEL[type] || type}{type === 'SPECIAL' && <span className="text-[#EC4899] ml-1 text-xs">✦</span>}</h3>
                       <p className={`text-xs sm:text-sm mt-1 ${statusColor}`}>{statusIcon} {statusMsg}</p>
                     </div>
                     {matchingSermon ? (
@@ -285,33 +297,33 @@ export default function HomePage() {
           <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2"><span className="w-1 h-4 bg-[#0F1A2E] rounded-full" />빠른 작업</h2>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             <button onClick={() => router.push('/sermons/new')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all group">
-              <div className="w-12 h-12 bg-[#0F1A2E] rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-[#C9A84C] transition-colors">
-                <svg className="w-5 h-5 text-[#C9A84C] group-hover:text-[#0F1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+              <div className="w-12 h-12 bg-gradient-to-br from-[#C9A84C] to-[#8B6914] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#C9A84C]/20">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
               </div>
               <span className="text-xs font-semibold text-gray-700">새 설교</span>
             </button>
-            <button onClick={() => router.push('/sermons')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all group">
-              <div className="w-12 h-12 bg-[#0F1A2E] rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-[#C9A84C] transition-colors">
-                <svg className="w-5 h-5 text-[#C9A84C] group-hover:text-[#0F1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            <button onClick={() => router.push('/sermons')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#3B82F6]/20 transition-all group">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#3B82F6] to-[#1D4ED8] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#3B82F6]/20">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
               </div>
               <span className="text-xs font-semibold text-gray-700">설교 목록</span>
             </button>
-            <button onClick={() => router.push('/sermons/analyze')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all group">
-              <div className="w-12 h-12 bg-[#0F1A2E] rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-[#C9A84C] transition-colors">
-                <svg className="w-5 h-5 text-[#C9A84C] group-hover:text-[#0F1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+            <button onClick={() => router.push('/sermons/analyze')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#059669]/20 transition-all group">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#059669] to-[#047857] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#059669]/20">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
               </div>
               <span className="text-xs font-semibold text-gray-700">설교 분석</span>
             </button>
-            <button onClick={() => router.push('/calendar')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all group">
-              <div className="w-12 h-12 bg-[#0F1A2E] rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-[#C9A84C] transition-colors">
-                <svg className="w-5 h-5 text-[#C9A84C] group-hover:text-[#0F1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            <button onClick={() => router.push('/calendar')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#8B5CF6]/20 transition-all group">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#8B5CF6] to-[#6D28D9] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#8B5CF6]/20">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               </div>
               <span className="text-xs font-semibold text-gray-700">캘린더</span>
             </button>
             {membership.role === 'CHURCH_ADMIN' && (
-              <button onClick={() => router.push('/billing')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#C9A84C]/30 transition-all group">
-                <div className="w-12 h-12 bg-[#0F1A2E] rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-[#C9A84C] transition-colors">
-                  <svg className="w-5 h-5 text-[#C9A84C] group-hover:text-[#0F1A2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+              <button onClick={() => router.push('/billing')} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md hover:border-[#F59E0B]/20 transition-all group">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#F59E0B] to-[#D97706] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#F59E0B]/20">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                 </div>
                 <span className="text-xs font-semibold text-gray-700">결제 관리</span>
               </button>
