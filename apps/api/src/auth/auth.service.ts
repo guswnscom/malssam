@@ -109,6 +109,43 @@ export class AuthService {
     };
   }
 
+  async findEmail(name: string) {
+    const users = await this.prisma.user.findMany({
+      where: {
+        name: { contains: name },
+      },
+      select: { email: true, name: true, createdAt: true },
+    });
+
+    if (users.length === 0) {
+      throw new UnauthorizedException('해당 이름으로 가입된 계정이 없습니다');
+    }
+
+    // 이메일 마스킹: abc@gmail.com → a**@gmail.com
+    return users.map(u => {
+      const [local, domain] = u.email.split('@');
+      const masked = local[0] + '*'.repeat(Math.max(local.length - 1, 2)) + '@' + domain;
+      return { email: masked, name: u.name, createdAt: u.createdAt };
+    });
+  }
+
+  async resetPassword(email: string, newPassword: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    if (!user) {
+      throw new UnauthorizedException('해당 이메일로 가입된 계정이 없습니다');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash },
+    });
+
+    return { message: '비밀번호가 성공적으로 변경되었습니다' };
+  }
+
   private async generateTokens(userId: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwt.signAsync(

@@ -30,6 +30,19 @@ export class AuthController {
     return this.authService.refresh(refreshToken);
   }
 
+  @Post('find-email')
+  findEmail(@Body('name') name: string) {
+    return this.authService.findEmail(name);
+  }
+
+  @Post('reset-password')
+  resetPassword(
+    @Body('email') email: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    return this.authService.resetPassword(email, newPassword);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getMe(@Request() req: any) {

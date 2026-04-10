@@ -73,6 +73,12 @@ export default function LoginPage() {
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
+            <div className="text-right">
+              <Link href="/find-account" className="text-xs text-gray-400 hover:text-[#C9A84C] transition-colors">
+                이메일 / 비밀번호 찾기
+              </Link>
+            </div>
+
             <button type="submit" disabled={loading}
               className="w-full bg-[#0F1A2E] text-white py-3.5 rounded-xl font-semibold hover:bg-[#1B2D4A] disabled:bg-gray-300 transition-colors text-sm">
               {loading ? '로그인 중...' : '로그인'}
