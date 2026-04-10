@@ -29,7 +29,7 @@ export default function SermonsListPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8]">
+    <div className="min-h-screen">
       <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <button onClick={() => router.push('/home')} className="text-[#8B9DC3] hover:text-white">← 홈</button>

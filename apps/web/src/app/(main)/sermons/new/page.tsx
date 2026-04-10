@@ -5,11 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 
 const WORSHIP_TYPES = [
-  { value: 'SUNDAY', label: '주일예배', icon: '⛪' },
-  { value: 'WEDNESDAY', label: '수요예배', icon: '📖' },
-  { value: 'FRIDAY', label: '금요예배', icon: '🙏' },
-  { value: 'DAWN', label: '새벽예배', icon: '🌅' },
-  { value: 'SPECIAL', label: '특별예배', icon: '✨' },
+  { value: 'SUNDAY', label: '주일예배', icon: '✝', color: 'from-[#C9A84C] to-[#8B6914]' },
+  { value: 'WEDNESDAY', label: '수요예배', icon: '📖', color: 'from-[#3B82F6] to-[#1D4ED8]' },
+  { value: 'FRIDAY', label: '금요예배', icon: '🙏', color: 'from-[#8B5CF6] to-[#6D28D9]' },
+  { value: 'DAWN', label: '새벽예배', icon: '🕊', color: 'from-[#F59E0B] to-[#D97706]' },
+  { value: 'SPECIAL', label: '특별예배', icon: '✦', color: 'from-[#EC4899] to-[#BE185D]' },
 ];
 
 const DEPTHS = [
@@ -152,14 +152,14 @@ function NewSermonPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* 상단 */}
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+      <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <button onClick={() => router.push('/home')} className="text-gray-500 hover:text-gray-700">
+          <button onClick={() => router.push('/home')} className="text-[#8B9DC3] hover:text-white">
             ← 홈
           </button>
-          <h1 className="text-lg font-semibold">새 설교 만들기</h1>
+          <h1 className="text-lg font-semibold text-white">새 설교 만들기</h1>
           <div className="w-12" />
         </div>
       </header>
@@ -204,14 +204,16 @@ function NewSermonPage() {
                 <button
                   key={w.value}
                   onClick={() => setForm({ ...form, worshipType: w.value })}
-                  className={`p-4 rounded-xl border-2 text-center transition-all ${
+                  className={`p-5 rounded-2xl text-center transition-all ${
                     form.worshipType === w.value
-                      ? 'border-blue-600 bg-blue-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
+                      ? 'bg-[#0F1A2E] border-2 border-[#C9A84C] shadow-lg'
+                      : 'bg-white/80 border-2 border-gray-100 hover:border-[#C9A84C]/30 hover:shadow-md'
                   }`}
                 >
-                  <span className="text-2xl block mb-1">{w.icon}</span>
-                  <span className="text-sm font-medium">{w.label}</span>
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2 bg-gradient-to-br ${w.color} shadow-lg`}>
+                    <span className="text-xl text-white">{w.icon}</span>
+                  </div>
+                  <span className={`text-sm font-semibold ${form.worshipType === w.value ? 'text-[#C9A84C]' : 'text-gray-700'}`}>{w.label}</span>
                 </button>
               ))}
             </div>

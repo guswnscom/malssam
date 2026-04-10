@@ -103,7 +103,7 @@ export default function HomePage() {
   const upcomingEvents = getUpcomingEvents();
 
   return (
-    <div className="bg-[#FAFAF8] min-h-screen">
+    <div className="min-h-screen">
       {/* 상단 바 */}
       <header className="bg-[#0F1A2E] px-4 sm:px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -215,23 +215,23 @@ export default function HomePage() {
               }
 
               return (
-                <div key={type} className={`bg-white p-4 sm:p-5 rounded-2xl shadow-sm hover:shadow-md transition-all ${
-                  type === 'SUNDAY' ? 'border-l-4 border-l-[#C9A84C] border border-gray-100' :
-                  type === 'WEDNESDAY' ? 'border-l-4 border-l-[#3B82F6] border border-gray-100' :
-                  type === 'FRIDAY' ? 'border-l-4 border-l-[#8B5CF6] border border-gray-100' :
-                  type === 'DAWN' ? 'border-l-4 border-l-[#F59E0B] border border-gray-100' :
-                  type === 'SPECIAL' ? 'border-l-4 border-l-[#EC4899] border border-gray-100' :
-                  'border border-gray-100'
+                <div key={type} className={`p-4 sm:p-5 rounded-2xl shadow-sm hover:shadow-lg transition-all ${
+                  type === 'SUNDAY' ? 'bg-gradient-to-r from-[#C9A84C] to-[#8B6914] text-white border border-[#C9A84C]/30' :
+                  type === 'WEDNESDAY' ? 'bg-white border-l-4 border-l-[#3B82F6] border border-gray-100' :
+                  type === 'FRIDAY' ? 'bg-white border-l-4 border-l-[#8B5CF6] border border-gray-100' :
+                  type === 'DAWN' ? 'bg-white border-l-4 border-l-[#F59E0B] border border-gray-100' :
+                  type === 'SPECIAL' ? 'bg-white border-l-4 border-l-[#EC4899] border border-gray-100' :
+                  'bg-white border border-gray-100'
                 }`}>
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900">{WORSHIP_LABEL[type] || type}{type === 'SPECIAL' && <span className="text-[#EC4899] ml-1 text-xs">✦</span>}</h3>
-                      <p className={`text-xs sm:text-sm mt-1 ${statusColor}`}>{statusIcon} {statusMsg}</p>
+                      <h3 className={`font-semibold ${type === 'SUNDAY' ? 'text-white' : 'text-gray-900'}`}>{WORSHIP_LABEL[type] || type}{type === 'SPECIAL' && <span className="text-[#EC4899] ml-1 text-xs">✦</span>}</h3>
+                      <p className={`text-xs sm:text-sm mt-1 ${type === 'SUNDAY' ? 'text-white/80' : statusColor}`}>{statusIcon} {statusMsg}</p>
                     </div>
                     {matchingSermon ? (
                       <button
                         onClick={() => router.push(`/sermons/${matchingSermon.id}`)}
-                        className="bg-[#0F1A2E] text-white px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium hover:bg-[#1B2D4A] transition-colors flex-shrink-0"
+                        className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-colors flex-shrink-0 ${type === 'SUNDAY' ? 'bg-white text-[#8B6914] hover:bg-white/90' : 'bg-[#0F1A2E] text-white hover:bg-[#1B2D4A]'}`}
                       >
                         보기
                       </button>
@@ -272,11 +272,12 @@ export default function HomePage() {
                 <button
                   key={s.id}
                   onClick={() => router.push(`/sermons/${s.id}`)}
-                  className="w-full text-left bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:border-[#C9A84C]/30 hover:shadow-md transition-all"
+                  className="w-full text-left bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:border-[#C9A84C]/30 hover:shadow-md transition-all relative overflow-hidden"
                 >
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#C9A84C]/40 to-transparent" />
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-medium text-gray-900 truncate">{s.title}</h3>
+                      <h3 className="font-semibold text-gray-900 truncate">{s.title} <span className="text-[#C9A84C]">✝</span></h3>
                       <p className="text-sm text-gray-500 mt-0.5">📖 {s.scripture}</p>
                     </div>
                     <span className="flex-shrink-0 bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">

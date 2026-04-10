@@ -236,7 +236,7 @@ ${sermon.conclusion}
   );
 
   return (
-    <div className="bg-[#FAFAF8] pb-8">
+    <div className="pb-8">
       <header className="bg-[#0F1A2E] px-4 sm:px-6 py-3 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <button onClick={() => router.push('/sermons')} className="text-[#8B9DC3] text-sm hover:text-white">← 목록</button>
