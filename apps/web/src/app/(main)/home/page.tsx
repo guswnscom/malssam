@@ -215,7 +215,15 @@ export default function HomePage() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => router.push('/sermons/new')}
+                        onClick={() => {
+                          // 다음 해당 요일 계산
+                          const now = new Date();
+                          let daysUntil = worshipDay - now.getDay();
+                          if (daysUntil <= 0) daysUntil += 7;
+                          const nextDate = new Date(now.getTime() + daysUntil * 86400000);
+                          const dateStr2 = nextDate.toISOString().split('T')[0];
+                          router.push(`/sermons/new?worshipType=${type}&date=${dateStr2}`);
+                        }}
                         className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors flex-shrink-0"
                       >
                         설교 만들기

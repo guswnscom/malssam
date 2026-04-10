@@ -33,6 +33,7 @@ export default function SermonDetailPage() {
   const [regenLoading, setRegenLoading] = useState(false);
   const [enrichLoading, setEnrichLoading] = useState('');
   const [showDelete, setShowDelete] = useState(false);
+  const [reviewResult, setReviewResult] = useState<{ before: SermonData; after: SermonData; changes: string[] } | null>(null);
 
   const sid = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
 
@@ -132,14 +133,34 @@ export default function SermonDetailPage() {
   };
 
   const handleFinalReview = async () => {
+    if (!sermon) return;
+    // 기존 버전 저장
+    const before = { ...sermon };
     setRegenLoading(true);
     try {
+      // 먼저 현재 상태 저장
+      await api.put(`/sermons/${sermon.id}`, {
+        title: sermon.title, summary: sermon.summary, introduction: sermon.introduction,
+        outline: sermon.outline, application: sermon.application, conclusion: sermon.conclusion,
+      });
+      // AI 검토 실행
       const r = await api.post(`/sermons/${sermon.id}/regenerate`, {
-        feedback: '전체 설교를 최종 검토해주세요. 전달력, 구조, 자연스러움을 개선하고 주석보다 강단 전달 중심으로 다듬어주세요.',
+        feedback: '전체 설교를 최종 검토해주세요. 전달력, 구조, 자연스러움을 개선하고 주석보다 강단 전달 중심으로 다듬어주세요. 예화와 실생활 적용을 강화해주세요.',
         targetSection: 'FULL',
       });
-      setSermon(r.data);
-      alert('AI 최종검토 완료');
+      const after = r.data;
+      // 변경 사항 비교
+      const changes: string[] = [];
+      if (before.title !== after.title) changes.push('제목이 수정되었습니다');
+      if (before.introduction !== after.introduction) changes.push('서론이 개선되었습니다');
+      before.outline.forEach((o: any, i: number) => {
+        if (after.outline[i] && o.content !== after.outline[i].content) changes.push(`대지 ${i + 1} "${o.title}"이 수정되었습니다`);
+      });
+      if (before.application !== after.application) changes.push('적용이 개선되었습니다');
+      if (before.conclusion !== after.conclusion) changes.push('결론이 수정되었습니다');
+      if (changes.length === 0) changes.push('전체적인 문체와 표현이 다듬어졌습니다');
+      setSermon(after);
+      setReviewResult({ before, after, changes });
     } catch (e: any) { alert(e?.response?.data?.message || 'AI 검토 실패'); }
     finally { setRegenLoading(false); }
   };
@@ -261,9 +282,33 @@ export default function SermonDetailPage() {
           </div>
           <button onClick={handleFinalReview} disabled={regenLoading || sermon.regenerationCount >= 5}
             className="w-full py-3 rounded-lg text-sm font-semibold bg-purple-600 text-white hover:bg-purple-700 disabled:bg-purple-300">
-            {regenLoading ? '🔍 검토중...' : '🔍 AI 최종검토'}
+            {regenLoading ? '🔍 AI가 검토 중입니다 (15~30초 소요, 길이에 따라 더 걸릴 수 있습니다)...' : '🔍 AI 최종검토'}
           </button>
         </div>
+
+        {/* AI 검토 비교 결과 */}
+        {reviewResult && (
+          <div className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-4">
+            <h3 className="font-semibold text-purple-900 mb-3">🔍 AI 최종검토 결과</h3>
+            <div className="space-y-2 mb-4">
+              {reviewResult.changes.map((c, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm text-purple-800">
+                  <span className="text-purple-500 flex-shrink-0">✓</span> {c}
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => { setSermon(reviewResult.before as any); setReviewResult(null); }}
+                className="flex-1 py-2 rounded-lg text-sm font-medium border border-purple-300 text-purple-700 hover:bg-purple-100">
+                ↩ 수정 전 버전으로 되돌리기
+              </button>
+              <button onClick={() => setReviewResult(null)}
+                className="flex-1 py-2 rounded-lg text-sm font-medium bg-purple-600 text-white hover:bg-purple-700">
+                ✓ 수정 후 버전 유지
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="flex gap-3">
           <button onClick={() => router.push('/sermons/new')} className="flex-1 py-3 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700">새 설교</button>

@@ -49,11 +49,14 @@ function NewSermonPage() {
     specialInstruction: '',
   });
 
-  // URL 파라미터에서 본문/힌트 읽기 (절기 연결) - 마운트 시 1회만
+  // URL 파라미터 처리 - 마운트 시 1회만
   useEffect(() => {
     try {
       const scriptureParam = searchParams.get('scripture');
       const hintParam = searchParams.get('hint');
+      const worshipParam = searchParams.get('worshipType');
+      const dateParam = searchParams.get('date');
+
       if (scriptureParam) {
         setForm(prev => ({ ...prev, scripture: scriptureParam }));
         setStep(2);
@@ -61,6 +64,15 @@ function NewSermonPage() {
       if (hintParam) {
         setHint(hintParam);
         setForm(prev => ({ ...prev, specialInstruction: `${hintParam} 관련 설교` }));
+      }
+      // 홈에서 예배 유형 선택해서 온 경우 → Step 1 건너뛰기
+      if (worshipParam) {
+        setForm(prev => ({
+          ...prev,
+          worshipType: worshipParam,
+          ...(dateParam ? { targetDate: dateParam } : {}),
+        }));
+        if (!scriptureParam) setStep(2); // 본문 입력 단계로 바로 이동
       }
     } catch { /* ignore */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -93,6 +105,14 @@ function NewSermonPage() {
     }
   };
 
+  // 로딩 시간 추적
+  const [loadingSec, setLoadingSec] = useState(0);
+  useEffect(() => {
+    if (!loading) { setLoadingSec(0); return; }
+    const timer = setInterval(() => setLoadingSec(s => s + 1), 1000);
+    return () => clearInterval(timer);
+  }, [loading]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
@@ -101,13 +121,23 @@ function NewSermonPage() {
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             AI가 설교를 준비하고 있습니다...
           </h2>
-          <p className="text-gray-500">약 15~20초 정도 소요됩니다</p>
+
+          {loadingSec < 20 ? (
+            <p className="text-gray-500">약 15~30초 정도 소요됩니다</p>
+          ) : loadingSec < 60 ? (
+            <p className="text-amber-600">심화된 내용을 교리에 맞게 검토하고 있습니다. 잠시만 기다려주세요...</p>
+          ) : loadingSec < 120 ? (
+            <p className="text-amber-600">깊이 있는 설교를 위해 더 자세히 검토 중입니다. 곧 완성됩니다...</p>
+          ) : (
+            <p className="text-red-500">생성에 시간이 오래 걸리고 있습니다. 잠시 후 다시 시도해주세요.</p>
+          )}
+
           <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-400">
-            <span>본문 분석</span>
+            <span className={loadingSec > 0 ? 'text-green-500' : ''}>본문 분석 ✓</span>
             <span>→</span>
-            <span>구조 설계</span>
+            <span className={loadingSec > 5 ? 'text-green-500' : ''}>구조 설계 {loadingSec > 5 ? '✓' : ''}</span>
             <span>→</span>
-            <span className="text-blue-600 font-medium">초안 작성 중...</span>
+            <span className="text-blue-600 font-medium">초안 작성 중... ({loadingSec}초)</span>
           </div>
         </div>
       </div>
