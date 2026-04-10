@@ -21,6 +21,7 @@ model User {
   memberships     Membership[]
   sermonRequests  SermonRequest[]
   prayerTopics    PrayerTopic[]
+  churchEvents    ChurchEvent[]
   @@map("users")
 }
 
@@ -40,6 +41,7 @@ model Church {
   worshipSchedules    WorshipSchedule[]
   sermonRequests      SermonRequest[]
   prayerTopics        PrayerTopic[]
+  churchEvents        ChurchEvent[]
   @@map("churches")
 }
 
@@ -167,4 +169,28 @@ model Subscription {
   updatedAt         DateTime  @updatedAt @map("updated_at")
   church            Church    @relation(fields: [churchId], references: [id])
   @@map("subscriptions")
+}
+
+model ChurchEvent {
+  id              String    @id @default(uuid()) @db.Uuid
+  churchId        String    @map("church_id") @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  title           String    @db.VarChar(200)
+  date            DateTime  @db.Date
+  endDate         DateTime? @map("end_date") @db.Date
+  eventType       String    @default("CUSTOM") @map("event_type") @db.VarChar(20)
+  worshipType     String?   @map("worship_type") @db.VarChar(20)
+  needsSermon     Boolean   @default(false) @map("needs_sermon")
+  sermonId        String?   @map("sermon_id") @db.Uuid
+  scripture       String?   @db.VarChar(100)
+  description     String?   @db.Text
+  reminderDays    Int[]     @default([]) @map("reminder_days")
+  color           String?   @db.VarChar(7)
+  isLiturgical    Boolean   @default(false) @map("is_liturgical")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  church          Church    @relation(fields: [churchId], references: [id])
+  user            User      @relation(fields: [userId], references: [id])
+  @@index([churchId, date])
+  @@map("church_events")
 }

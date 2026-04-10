@@ -286,6 +286,10 @@ export default function HomePage() {
               <span className="text-2xl block mb-1">🔍</span>
               <span className="text-sm font-medium text-gray-700">설교 분석</span>
             </button>
+            <button onClick={() => router.push('/calendar')} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-shadow">
+              <span className="text-2xl block mb-1">📅</span>
+              <span className="text-sm font-medium text-gray-700">캘린더</span>
+            </button>
             {membership.role === 'CHURCH_ADMIN' && (
               <button onClick={() => router.push('/billing')} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-shadow">
                 <span className="text-2xl block mb-1">💳</span>
