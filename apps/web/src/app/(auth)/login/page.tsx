@@ -10,6 +10,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const [form, setForm] = useState({ email: '', password: '' });
+  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -17,7 +18,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError(''); setLoading(true);
     try {
-      const { data } = await api.post('/auth/login', form);
+      const { data } = await api.post('/auth/login', { ...form, keepLoggedIn });
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       const meRes = await api.get('/auth/me');
@@ -73,7 +74,12 @@ export default function LoginPage() {
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
-            <div className="text-right">
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" checked={keepLoggedIn} onChange={e => setKeepLoggedIn(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-[#C9A84C] focus:ring-[#C9A84C]/30 cursor-pointer" />
+                <span className="text-sm text-gray-600">로그인 유지</span>
+              </label>
               <Link href="/find-account" className="text-xs text-gray-400 hover:text-[#C9A84C] transition-colors">
                 이메일 / 비밀번호 찾기
               </Link>

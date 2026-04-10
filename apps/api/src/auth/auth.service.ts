@@ -45,7 +45,7 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto & { keepLoggedIn?: boolean }) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -63,7 +63,7 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    const tokens = await this.generateTokens(user.id);
+    const tokens = await this.generateTokens(user.id, dto.keepLoggedIn);
 
     return {
       user: { id: user.id, name: user.name, email: user.email },
@@ -146,20 +146,23 @@ export class AuthService {
     return { message: '비밀번호가 성공적으로 변경되었습니다' };
   }
 
-  private async generateTokens(userId: string) {
+  private async generateTokens(userId: string, keepLoggedIn = false) {
+    const accessExpiry = keepLoggedIn ? '30d' : '1d';
+    const refreshExpiry = keepLoggedIn ? '90d' : '7d';
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwt.signAsync(
         { sub: userId },
         {
           secret: this.config.get('JWT_ACCESS_SECRET'),
-          expiresIn: this.config.get('JWT_ACCESS_EXPIRY') || '7d',
+          expiresIn: this.config.get('JWT_ACCESS_EXPIRY') || accessExpiry,
         },
       ),
       this.jwt.signAsync(
         { sub: userId },
         {
           secret: this.config.get('JWT_REFRESH_SECRET'),
-          expiresIn: this.config.get('JWT_REFRESH_EXPIRY') || '90d',
+          expiresIn: this.config.get('JWT_REFRESH_EXPIRY') || refreshExpiry,
         },
       ),
     ]);
