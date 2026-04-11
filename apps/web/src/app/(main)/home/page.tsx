@@ -178,7 +178,7 @@ export default function HomePage() {
             <div className="absolute right-0 top-0 bottom-0 w-1/2 sm:w-2/5">
               <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF8E7]/80 to-[#FFF8E7]/10 z-10" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#FFF8E7]/40 to-transparent z-10" />
-              <img src="https://images.unsplash.com/photo-1560785218-893e43abaed3?w=800&q=90&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <img src="https://images.unsplash.com/photo-1507692049790-de58290a4334?w=800&q=90&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
             </div>
             <div className="relative p-5 sm:p-6 z-20">
             <h3 className="text-sm font-semibold text-[#8B6914] mb-3 flex items-center gap-2">
