@@ -31,6 +31,7 @@ export default function SermonDetailPage() {
   const [regenFeedback, setRegenFeedback] = useState('');
   const [regenSection, setRegenSection] = useState('FULL');
   const [regenLoading, setRegenLoading] = useState(false);
+  const [reviewLoading, setReviewLoading] = useState(false);
   const [enrichLoading, setEnrichLoading] = useState('');
   const [showDelete, setShowDelete] = useState(false);
   const [reviewResult, setReviewResult] = useState<{ before: SermonData; after: SermonData; changes: string[] } | null>(null);
@@ -84,7 +85,7 @@ export default function SermonDetailPage() {
   };
 
   const handleRegen = async () => {
-    if (!sermon || !regenFeedback.trim()) return;
+    if (!sermon || !regenFeedback.trim() || reviewLoading) return;
     setRegenLoading(true);
     try {
       const r = await api.post(`/sermons/${sermon.id}/regenerate`, { feedback: regenFeedback, targetSection: regenSection });
@@ -288,9 +289,9 @@ ${sermon.conclusion}
   };
 
   const handleFinalReview = async () => {
-    if (!sermon) return;
+    if (!sermon || regenLoading) return;
     const before = { ...sermon };
-    setRegenLoading(true);
+    setReviewLoading(true);
     setReviewSec(0);
     const timer = setInterval(() => setReviewSec(s => s + 1), 1000);
     try {
@@ -318,7 +319,7 @@ ${sermon.conclusion}
       setSermon(after);
       setReviewResult({ before, after, changes });
     } catch (e: any) { alert(e?.response?.data?.message || 'AI 검토 실패'); }
-    finally { clearInterval(timer); setRegenLoading(false); setReviewSec(0); }
+    finally { clearInterval(timer); setReviewLoading(false); setReviewSec(0); }
   };
 
   const Section = ({ k, label, text, bg = '', enrich = false }: { k: string; label: string; text: string; bg?: string; enrich?: boolean }) => (
@@ -429,7 +430,7 @@ ${sermon.conclusion}
                 <option value="APPLICATION">적용</option><option value="CONCLUSION">결론</option>
               </select>
               <textarea value={regenFeedback} onChange={e => setRegenFeedback(e.target.value)} className="w-full px-3 py-3 rounded-lg border text-sm resize-none" rows={3} maxLength={500} placeholder="예: 결론을 더 따뜻하게" />
-              <button onClick={handleRegen} disabled={regenLoading || !regenFeedback.trim() || sermon.regenerationCount >= 5}
+              <button onClick={handleRegen} disabled={regenLoading || reviewLoading || !regenFeedback.trim() || sermon.regenerationCount >= 5}
                 className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium disabled:bg-blue-300">
                 {regenLoading ? '재생성 중...' : '재생성'}
               </button>
@@ -455,7 +456,7 @@ ${sermon.conclusion}
               </button>
             ))}
           </div>
-          {regenLoading ? (
+          {reviewLoading ? (
             <div className="w-full py-4 rounded-xl bg-[#1B2D4A] text-center">
               <div className="flex items-center justify-center gap-3 mb-2">
                 <div className="w-5 h-5 border-2 border-[#C9A84C]/30 border-t-[#C9A84C] rounded-full animate-spin" />
@@ -467,7 +468,7 @@ ${sermon.conclusion}
               <p className="text-xs text-[#5A6F8C] mt-1">경과: {reviewSec}초 | 평균 30~60초</p>
             </div>
           ) : (
-            <button onClick={handleFinalReview} disabled={sermon.regenerationCount >= 5}
+            <button onClick={handleFinalReview} disabled={sermon.regenerationCount >= 5 || regenLoading}
               className="w-full py-3.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#C9A84C] to-[#8B6914] text-white hover:opacity-90 disabled:opacity-40 transition-all flex items-center justify-center gap-2"
               style={{ boxShadow: '0 4px 14px rgba(201,168,76,0.3)' }}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>

@@ -288,12 +288,25 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {/* 순서: 주일→수요→금요→새벽→특별 */}
             {['SUNDAY','WEDNESDAY','FRIDAY','DAWN','SPECIAL'].filter(t => churchData.profile.worshipTypes.includes(t)).map((type) => {
-              // 해당 예배 유형의 최근 설교 찾기
-              const matchingSermon = recentSermons.find(s => s.worshipType === type);
               const WORSHIP_DAY: Record<string, number> = { SUNDAY: 0, WEDNESDAY: 3, FRIDAY: 5, DAWN: 1, SPECIAL: 6 };
               const today = new Date();
+              today.setHours(0, 0, 0, 0);
               const todayDay = today.getDay();
               const worshipDay = WORSHIP_DAY[type] ?? 0;
+
+              // 이번 주(또는 다음) 해당 요일 날짜 계산
+              let daysUntil = worshipDay - todayDay;
+              if (daysUntil < 0) daysUntil += 7; // 이미 지났으면 다음 주
+              const nextWorshipDate = new Date(today.getTime() + daysUntil * 86400000);
+
+              // 해당 예배의 설교 중 이번 주 이후 날짜의 설교만 매칭
+              const matchingSermon = recentSermons.find(s => {
+                if (s.worshipType !== type) return false;
+                const sermonDate = new Date(s.targetDate);
+                sermonDate.setHours(0, 0, 0, 0);
+                return sermonDate >= today; // 오늘 이후 설교만 매칭
+              });
+
               const isPast = todayDay > worshipDay && type !== 'DAWN';
               const isToday = todayDay === worshipDay;
 
@@ -341,12 +354,7 @@ export default function HomePage() {
                     ) : (
                       <button
                         onClick={() => {
-                          // 다음 해당 요일 계산
-                          const now = new Date();
-                          let daysUntil = worshipDay - now.getDay();
-                          if (daysUntil <= 0) daysUntil += 7;
-                          const nextDate = new Date(now.getTime() + daysUntil * 86400000);
-                          const dateStr2 = nextDate.toISOString().split('T')[0];
+                          const dateStr2 = nextWorshipDate.toISOString().split('T')[0];
                           router.push(`/sermons/new?worshipType=${type}&date=${dateStr2}`);
                         }}
                         className="bg-[#C9A84C] text-[#0F1A2E] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold hover:bg-[#D4B85C] transition-colors flex-shrink-0"
