@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import PageHelp, { HelpButton, HELP_DATA } from '@/components/PageHelp';
+import { useToast } from '@/components/Toast';
 
 interface CalEvent {
   id: string; title: string; date: string; endDate?: string;
@@ -22,6 +23,7 @@ const REMINDER_OPTIONS = [
 
 export default function CalendarPage() {
   const router = useRouter();
+  const { toast, confirm: confirmDialog } = useToast();
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
@@ -63,18 +65,19 @@ export default function CalendarPage() {
   };
 
   const handleAdd = async () => {
-    if (!newEvent.title || !newEvent.date) { alert('제목과 날짜를 입력해주세요'); return; }
+    if (!newEvent.title || !newEvent.date) { toast('error', '제목과 날짜를 입력해주세요'); return; }
     try {
       await api.post('/calendar/events', newEvent);
       setShowAdd(false);
       setNewEvent({ title: '', date: '', worshipType: '', needsSermon: false, scripture: '', description: '', reminderDays: [] });
       fetchEvents();
-    } catch { alert('일정 추가 실패'); }
+    } catch { toast('error', '일정 추가에 실패했습니다'); }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('이 일정을 삭제하시겠습니까?')) return;
-    try { await api.delete(`/calendar/events/${id}`); fetchEvents(); } catch { alert('삭제 실패'); }
+    const ok = await confirmDialog({ title: '일정 삭제', message: '이 일정을 삭제하시겠습니까?', confirmText: '삭제', danger: true });
+    if (!ok) return;
+    try { await api.delete(`/calendar/events/${id}`); fetchEvents(); toast('success', '일정이 삭제되었습니다'); } catch { toast('error', '삭제에 실패했습니다'); }
   };
 
   const isToday = (d: number) => d === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear();

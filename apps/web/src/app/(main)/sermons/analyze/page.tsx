@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 
 interface AnalysisResult {
   deliveryLabel: string;
@@ -24,6 +25,7 @@ interface ImprovedSermon {
 
 export default function SermonAnalyzePage() {
   const router = useRouter();
+  const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -82,7 +84,7 @@ export default function SermonAnalyzePage() {
     try {
       const { data } = await api.post('/sermons/analyze/improve', { originalText: text, suggestions: result.suggestions });
       setImprovedSermon(data);
-    } catch (err: any) { alert(err.response?.data?.message || '개선 실패'); }
+    } catch (err: any) { toast('error', err.response?.data?.message || '개선에 실패했습니다'); }
     finally { setImprovingLoading(false); }
   };
 
@@ -91,12 +93,12 @@ export default function SermonAnalyzePage() {
     try {
       const { data } = await api.post('/sermons/save-improved', improvedSermon);
       setSavedId(data.id);
-      alert('저장되었습니다!');
-    } catch { alert('저장 실패'); }
+      toast('success', '저장되었습니다');
+    } catch { toast('error', '저장에 실패했습니다'); }
   };
 
   const handlePpt = async () => {
-    if (!savedId) { alert('먼저 저장해주세요'); return; }
+    if (!savedId) { toast('info', '먼저 저장해주세요'); return; }
     const res = await api.get(`/sermons/${savedId}/ppt`, { responseType: 'blob' });
     const a = document.createElement('a');
     a.href = window.URL.createObjectURL(new Blob([res.data]));
@@ -104,7 +106,7 @@ export default function SermonAnalyzePage() {
   };
 
   const handlePdf = () => {
-    if (!savedId) { alert('먼저 저장해주세요'); return; }
+    if (!savedId) { toast('info', '먼저 저장해주세요'); return; }
     const token = localStorage.getItem('accessToken');
     window.open(`${process.env.NEXT_PUBLIC_API_URL}/sermons/${savedId}/pdf?token=${token}`, '_blank');
   };

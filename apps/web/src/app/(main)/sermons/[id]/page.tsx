@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import PageHelp, { HelpButton, HELP_DATA } from '@/components/PageHelp';
+import { useToast } from '@/components/Toast';
 
 interface OutlinePoint { point: number; title: string; content: string; }
 interface Citation { id: string; type: string; author: string; title: string; }
@@ -22,6 +23,7 @@ const WL: Record<string, string> = {
 export default function SermonDetailPage() {
   const router = useRouter();
   const params = useParams();
+  const { toast, confirm } = useToast();
   const [sermon, setSermon] = useState<SermonData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -42,16 +44,50 @@ export default function SermonDetailPage() {
   const [feedbackRating, setFeedbackRating] = useState('');
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackSent, setFeedbackSent] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | ''>('');
 
   const sid = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
 
   useEffect(() => {
     if (!sid) { setError('ID 없음'); setLoading(false); return; }
+    // 로컬 임시저장 복구 시도
+    const draft = localStorage.getItem(`sermon_draft_${sid}`);
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft);
+        setSermon(parsed);
+        setAutoSaveStatus('saved');
+        setLoading(false);
+        // 서버 데이터도 확인 (백그라운드)
+        api.get(`/sermons/${sid}`).then(r => {
+          // 서버 데이터가 더 최신이면 교체
+          const serverUpdated = new Date(r.data.updatedAt).getTime();
+          const localUpdated = parsed._localSavedAt || 0;
+          if (serverUpdated > localUpdated) {
+            setSermon(r.data);
+            localStorage.removeItem(`sermon_draft_${sid}`);
+          }
+        }).catch(() => {});
+        return;
+      } catch { /* ignore invalid draft */ }
+    }
     api.get(`/sermons/${sid}`)
       .then(r => setSermon(r.data))
       .catch(e => setError(e?.response?.data?.message || '설교를 불러올 수 없습니다'))
       .finally(() => setLoading(false));
   }, [sid]);
+
+  // 자동저장: 30초마다 로컬 임시저장
+  useEffect(() => {
+    if (!sermon || !sid) return;
+    const timer = setInterval(() => {
+      try {
+        localStorage.setItem(`sermon_draft_${sid}`, JSON.stringify({ ...sermon, _localSavedAt: Date.now() }));
+        setAutoSaveStatus('saved');
+      } catch {}
+    }, 30000);
+    return () => clearInterval(timer);
+  }, [sermon, sid]);
 
   if (loading) return <div className="flex items-center justify-center py-32 bg-gray-50"><p className="text-gray-500">로딩 중...</p></div>;
   if (error || !sermon) return (
@@ -81,7 +117,7 @@ export default function SermonDetailPage() {
       }
       const r = await api.put(`/sermons/${sermon.id}`, d);
       setSermon(r.data); setEditingKey('');
-    } catch { alert('저장 실패'); }
+    } catch { toast('error', '저장에 실패했습니다'); }
     finally { setSaving(false); }
   };
 
@@ -91,7 +127,7 @@ export default function SermonDetailPage() {
     try {
       const r = await api.post(`/sermons/${sermon.id}/regenerate`, { feedback: regenFeedback, targetSection: regenSection });
       setSermon(r.data); setRegenFeedback(''); setRegenOpen(false);
-    } catch (e: any) { alert(e?.response?.data?.message || '재생성 실패'); }
+    } catch (e: any) { toast('error', e?.response?.data?.message || '재생성에 실패했습니다'); }
     finally { setRegenLoading(false); }
   };
 
@@ -108,7 +144,7 @@ export default function SermonDetailPage() {
         targetSection: `OUTLINE_${idx + 1}`,
       });
       setSermon(r.data);
-    } catch (e: any) { alert(e?.response?.data?.message || '예화 추가 실패'); }
+    } catch (e: any) { toast('error', e?.response?.data?.message || '예화 추가에 실패했습니다'); }
     finally { clearInterval(timer); setEnrichLoading(''); setEnrichSec(0); }
   };
 
@@ -213,7 +249,7 @@ ${sermon.conclusion}
       const { data } = await api.get(`/sermons/${sermon.id}/pdf-token`);
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
       window.open(`${baseUrl}/sermons/${sermon.id}/pdf?sig=${data.sig}&exp=${data.exp}`, '_blank');
-    } catch { alert('PDF를 열 수 없습니다'); }
+    } catch { toast('error', 'PDF를 열 수 없습니다'); }
   };
 
   const handleExportPdf = async () => {
@@ -225,7 +261,7 @@ ${sermon.conclusion}
       if (w) {
         setTimeout(() => { try { w.print(); } catch {} }, 2000);
       }
-    } catch { alert('PDF를 열 수 없습니다'); }
+    } catch { toast('error', 'PDF를 열 수 없습니다'); }
     logUsage('pdf_view', { sermonId: sermon.id });
   };
 
@@ -266,7 +302,7 @@ ${sermon.conclusion}
     // 클립보드 복사 (PC)
     try {
       await navigator.clipboard.writeText(shareText);
-      alert('설교 요약이 클립보드에 복사되었습니다. 메신저나 이메일에 붙여넣기 하세요.');
+      toast('success', '설교 요약이 클립보드에 복사되었습니다');
     } catch {
       // fallback
       const ta = document.createElement('textarea');
@@ -275,7 +311,7 @@ ${sermon.conclusion}
       ta.select();
       document.execCommand('copy');
       document.body.removeChild(ta);
-      alert('설교 요약이 클립보드에 복사되었습니다.');
+      toast('success', '설교 요약이 클립보드에 복사되었습니다');
     }
   };
 
@@ -286,13 +322,15 @@ ${sermon.conclusion}
         title: sermon.title, summary: sermon.summary, introduction: sermon.introduction,
         outline: sermon.outline, application: sermon.application, conclusion: sermon.conclusion,
       });
-      alert('저장되었습니다');
-    } catch { alert('저장 실패'); }
+      toast('success', '저장되었습니다');
+      localStorage.removeItem(`sermon_draft_${sermon.id}`);
+      setAutoSaveStatus('saved');
+    } catch { toast('error', '저장에 실패했습니다'); }
     finally { setSaving(false); }
   };
 
   const handleDelete = async () => {
-    try { await api.delete(`/sermons/${sermon.id}`); router.push('/sermons'); } catch { alert('삭제 실패'); }
+    try { await api.delete(`/sermons/${sermon.id}`); toast('success', '삭제되었습니다'); router.push('/sermons'); } catch { toast('error', '삭제에 실패했습니다'); }
   };
 
   const handleFinalReview = async () => {
@@ -325,7 +363,7 @@ ${sermon.conclusion}
       if (changes.length === 0) changes.push('전체적인 문체와 표현이 다듬어졌습니다');
       setSermon(after);
       setReviewResult({ before, after, changes });
-    } catch (e: any) { alert(e?.response?.data?.message || 'AI 검토 실패'); }
+    } catch (e: any) { toast('error', e?.response?.data?.message || 'AI 검토에 실패했습니다'); }
     finally { clearInterval(timer); setReviewLoading(false); setReviewSec(0); }
   };
 
@@ -369,7 +407,10 @@ ${sermon.conclusion}
         </div>
         <div className="max-w-3xl mx-auto flex items-center justify-between relative">
           <button onClick={() => router.push('/sermons')} className="text-[#8B9DC3] text-sm hover:text-white">← 목록</button>
-          <span className="text-xs sm:text-sm text-[#C9A84C]">{WL[sermon.worshipType]} · {dateStr}</span>
+          <div className="text-center">
+            <span className="text-xs sm:text-sm text-[#C9A84C]">{WL[sermon.worshipType]} · {dateStr}</span>
+            {autoSaveStatus === 'saved' && <p className="text-[10px] text-[#5A6F8C]">자동 저장됨</p>}
+          </div>
           <HelpButton pageKey="sermonDetail" steps={HELP_DATA.sermonDetail} />
         </div>
       </header>

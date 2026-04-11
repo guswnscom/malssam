@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { useToast } from '@/components/Toast';
 
 const PLANS = [
   { key: 'FREE', label: '무료', price: '0원', desc: '5편', features: ['설교 생성 5편', 'PDF 출력', '설교 분석'], color: 'border-gray-200', badge: '' },
@@ -13,6 +14,7 @@ const PLANS = [
 
 export default function BillingPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [feedbackPlan, setFeedbackPlan] = useState('');
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackRating, setFeedbackRating] = useState('');
@@ -20,7 +22,7 @@ export default function BillingPage() {
   const [submitted, setSubmitted] = useState(false);
 
   const handleFeedback = async () => {
-    if (!feedbackRating) { alert('만족도를 선택해주세요'); return; }
+    if (!feedbackRating) { toast('info', '만족도를 선택해주세요'); return; }
     setSubmitting(true);
     try {
       await api.post('/feedback', {
@@ -31,7 +33,7 @@ export default function BillingPage() {
       });
       setSubmitted(true);
       setTimeout(() => { setFeedbackPlan(''); setSubmitted(false); setFeedbackText(''); setFeedbackRating(''); }, 2000);
-    } catch { alert('피드백 전송에 실패했습니다'); }
+    } catch { toast('error', '피드백 전송에 실패했습니다'); }
     finally { setSubmitting(false); }
   };
 

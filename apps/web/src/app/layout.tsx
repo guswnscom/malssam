@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import ClientProviders from './ClientProviders';
 
 export const metadata: Metadata = {
   title: '말씀동역 - AI 설교 준비 도구',
@@ -14,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="text-gray-900 antialiased">
-        {children}
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );
