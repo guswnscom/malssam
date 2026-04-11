@@ -154,8 +154,9 @@ export class AuthService {
     });
 
     // TODO: 실제 이메일 발송 연동 시 여기에 추가
-    // 현재는 코드를 응답에 포함 (베타 기간 한정)
-    return { message: '해당 이메일로 인증 코드가 발송되었습니다', code };
+    // 베타 기간: 콘솔 로그로만 확인 (응답에 코드 노출 금지)
+    console.log(`[PASSWORD RESET] email: ${email}, code: ${code}`);
+    return { message: '해당 이메일로 인증 코드가 발송되었습니다' };
   }
 
   // 2단계: 코드 검증

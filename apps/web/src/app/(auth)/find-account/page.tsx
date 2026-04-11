@@ -41,9 +41,7 @@ export default function FindAccountPage() {
     e.preventDefault();
     setPwError(''); setPwLoading(true);
     try {
-      const { data } = await api.post('/auth/request-reset', { email: resetEmail.trim() });
-      // 베타: 코드가 응답에 포함됨 (이메일 발송 전까지)
-      if (data.code) setResetCode(data.code);
+      await api.post('/auth/request-reset', { email: resetEmail.trim() });
       setResetStep(2);
     } catch (err: any) {
       setPwError(err.response?.data?.message || '요청에 실패했습니다');

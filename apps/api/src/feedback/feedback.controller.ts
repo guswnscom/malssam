@@ -35,25 +35,27 @@ export class FeedbackController {
     return this.feedbackService.getUserStats(req.user.sub);
   }
 
-  // 관리자 전용: 역할 체크
-  private async checkAdmin(userId: string) {
-    const membership = await this.prisma.membership.findFirst({
-      where: { userId, status: 'active', role: { in: ['CHURCH_ADMIN', 'SENIOR_PASTOR'] } },
-    });
-    if (!membership) throw new ForbiddenException('관리자 권한이 필요합니다');
+  // 최고관리자 전용: 특정 이메일만 접근 가능
+  private static readonly SUPER_ADMIN_EMAILS = ['sioo0929@gmail.com'];
+
+  private async checkSuperAdmin(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    if (!user || !FeedbackController.SUPER_ADMIN_EMAILS.includes(user.email)) {
+      throw new ForbiddenException('최고관리자 권한이 필요합니다');
+    }
   }
 
   @Get('admin/all')
   @UseGuards(JwtAuthGuard)
   async getAllFeedbacks(@Request() req: any) {
-    await this.checkAdmin(req.user.sub);
+    await this.checkSuperAdmin(req.user.sub);
     return this.feedbackService.getAllFeedbacks();
   }
 
   @Get('admin/stats')
   @UseGuards(JwtAuthGuard)
   async getAdminStats(@Request() req: any) {
-    await this.checkAdmin(req.user.sub);
+    await this.checkSuperAdmin(req.user.sub);
     return this.feedbackService.getAdminStats();
   }
 }
