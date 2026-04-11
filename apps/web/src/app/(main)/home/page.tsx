@@ -65,6 +65,7 @@ export default function HomePage() {
   const [churchData, setChurchData] = useState<ChurchData | null>(null);
   const [recentSermons, setRecentSermons] = useState<SermonItem[]>([]);
   const [usageStats, setUsageStats] = useState<any>(null);
+  const [myEvents, setMyEvents] = useState<Array<{ id: string; title: string; date: string; eventType: string; description?: string }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -76,14 +77,32 @@ export default function HomePage() {
         const meRes = await api.get('/auth/me');
         if (!meRes.data.churchId) { router.push('/onboarding/church'); return; }
 
-        const [churchRes, sermonsRes, statsRes] = await Promise.all([
+        const now = new Date();
+        const thisMonth = now.getMonth() + 1;
+        const thisYear = now.getFullYear();
+        const nextMonth = thisMonth === 12 ? 1 : thisMonth + 1;
+        const nextYear = thisMonth === 12 ? thisYear + 1 : thisYear;
+
+        const [churchRes, sermonsRes, statsRes, eventsThisRes, eventsNextRes] = await Promise.all([
           api.get('/churches/me'),
           api.get('/sermons').catch(() => ({ data: [] })),
           api.get('/feedback/stats').catch(() => ({ data: null })),
+          api.get(`/calendar?year=${thisYear}&month=${thisMonth}`).catch(() => ({ data: { events: [] } })),
+          api.get(`/calendar?year=${nextYear}&month=${nextMonth}`).catch(() => ({ data: { events: [] } })),
         ]);
         setChurchData(churchRes.data);
         setRecentSermons(sermonsRes.data.slice(0, 5));
         setUsageStats(statsRes.data);
+
+        // 오늘 이후 30일 이내 일정만 필터
+        const allEvents = [...(eventsThisRes.data.events || []), ...(eventsNextRes.data.events || [])];
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const thirtyDaysLater = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const upcoming = allEvents
+          .filter((e: any) => !e.isLiturgical && new Date(e.date) >= today && new Date(e.date) <= thirtyDaysLater)
+          .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          .slice(0, 5);
+        setMyEvents(upcoming);
       } catch {
         router.push('/login');
       } finally {
@@ -208,6 +227,47 @@ export default function HomePage() {
               <p className="text-xs text-white/50">클릭하시면 해당 절기에 맞는 설교를 바로 준비할 수 있습니다</p>
             </div>
           </div>
+        )}
+
+        {/* 나의 다가오는 일정 */}
+        {myEvents.length > 0 && (
+          <section>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-1 h-4 bg-[#C9A84C] rounded-full" />
+              {(() => {
+                const me = useAuthStore.getState().user;
+                if (me?.name) {
+                  const parts = me.name.split('|');
+                  return `다가오는 ${parts[0]} ${parts[1] || '목사'}님 일정`;
+                }
+                return '다가오는 나의 일정';
+              })()}
+            </h2>
+            <div className="space-y-2">
+              {myEvents.map((ev) => {
+                const d = new Date(ev.date);
+                const daysLeft = Math.ceil((d.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                return (
+                  <button key={ev.id} onClick={() => router.push('/calendar')}
+                    className="w-full text-left bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:border-[#C9A84C]/30 hover:shadow-md transition-all flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[#0F1A2E] rounded-xl flex flex-col items-center justify-center flex-shrink-0">
+                      <span className="text-[10px] text-[#8B9DC3] leading-none">{d.toLocaleDateString('ko-KR', { month: 'short' })}</span>
+                      <span className="text-lg font-bold text-[#C9A84C] leading-none">{d.getDate()}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-gray-900 truncate">{ev.title}</h4>
+                      {ev.description && <p className="text-xs text-gray-400 truncate mt-0.5">{ev.description}</p>}
+                    </div>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-lg flex-shrink-0 ${
+                      daysLeft <= 3 ? 'bg-red-100 text-red-600' : daysLeft <= 7 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {daysLeft === 0 ? '오늘' : daysLeft === 1 ? '내일' : `D-${daysLeft}`}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
         )}
 
         {/* 이번주 예배 */}
