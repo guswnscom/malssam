@@ -172,13 +172,16 @@ export default function HomePage() {
 
         {/* 절기/이벤트 알림 */}
         {upcomingEvents.length > 0 && (
-          <div className="relative overflow-hidden rounded-2xl min-h-[150px] sm:min-h-[170px]">
-            {/* Gemini 생성 배경 이미지 */}
-            <Image src="/images/calendar-banner.png" alt="교회 일정" fill className="object-cover" priority sizes="(max-width: 768px) 100vw, 800px" />
-            {/* 텍스트 가독성을 위한 좌측 오버레이 */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#3B2510]/70 via-[#3B2510]/30 to-transparent" />
+          <div className="relative overflow-hidden rounded-2xl" style={{ background: '#5C3D2E' }}>
+            {/* Gemini 생성 배경 이미지 — 우측 정렬 */}
+            <div className="absolute inset-0">
+              <Image src="/images/calendar-banner.png" alt="교회 일정" fill className="object-cover object-right" priority sizes="(max-width: 768px) 100vw, 800px" />
+            </div>
+            {/* 좌측 나무 톤 오버레이 — 모바일에서 더 넓게 */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#4A3020] via-[#4A3020]/80 sm:via-[#4A3020]/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#3B2510]/30 via-transparent to-[#3B2510]/30" />
             {/* 콘텐츠 */}
-            <div className="relative p-5 sm:p-7 z-10 max-w-[70%] sm:max-w-[60%] flex flex-col justify-center h-full">
+            <div className="relative p-6 sm:p-7 z-10 flex flex-col justify-center min-h-[160px] sm:min-h-[170px]">
               <h3 className="text-xl sm:text-2xl font-bold text-[#E8D5A8] mb-3 sm:mb-4" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
                 다가오는 교회 일정
               </h3>
