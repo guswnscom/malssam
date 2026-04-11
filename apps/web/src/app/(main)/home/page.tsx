@@ -290,40 +290,43 @@ export default function HomePage() {
               const todayDay = today.getDay();
               const worshipDay = WORSHIP_DAY[type] ?? 0;
 
-              // 이번 주(또는 다음) 해당 요일 날짜 계산
+              // 다음 예배 날짜 계산
               let daysUntil = worshipDay - todayDay;
-              if (daysUntil < 0) daysUntil += 7; // 이미 지났으면 다음 주
+              if (type === 'DAWN') {
+                // 새벽예배: 항상 내일 (매일)
+                daysUntil = 1;
+              } else if (daysUntil <= 0) {
+                // 오늘이거나 지났으면 다음 주
+                daysUntil += 7;
+              }
               const nextWorshipDate = new Date(today.getTime() + daysUntil * 86400000);
+              const nextDateStr = nextWorshipDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+              const nextDayName = nextWorshipDate.toLocaleDateString('ko-KR', { weekday: 'short' });
 
-              // 해당 예배의 설교 중 이번 주 이후 날짜의 설교만 매칭
+              // 해당 예배 설교 매칭: 다음 예배 날짜와 같은 날짜의 설교만
               const matchingSermon = recentSermons.find(s => {
                 if (s.worshipType !== type) return false;
                 const sermonDate = new Date(s.targetDate);
                 sermonDate.setHours(0, 0, 0, 0);
-                return sermonDate >= today; // 오늘 이후 설교만 매칭
+                // 새벽예배: 오늘 날짜 설교만 매칭
+                if (type === 'DAWN') {
+                  return sermonDate.getTime() === today.getTime();
+                }
+                // 다른 예배: 다음 예배 날짜와 매칭
+                return sermonDate.getTime() === nextWorshipDate.getTime();
               });
-
-              const isPast = todayDay > worshipDay && type !== 'DAWN';
-              const isToday = todayDay === worshipDay;
 
               let statusMsg = '';
               let statusColor = 'text-gray-400';
-              let statusIcon = '';
               if (matchingSermon) {
-                statusMsg = '준비 완료';
+                statusMsg = '✓ 준비 완료';
                 statusColor = 'text-[#0F1A2E]';
-                statusIcon = '✓';
-              } else if (isToday) {
-                statusMsg = '오늘 예배 — 설교 준비가 필요합니다';
+              } else if (daysUntil <= 1) {
+                statusMsg = type === 'DAWN' ? '⏰ 내일 새벽예배' : '⏰ 설교 준비가 필요합니다';
                 statusColor = 'text-[#C9A84C] font-medium';
-                statusIcon = '⏰';
-              } else if (isPast) {
-                statusMsg = '다음 예배를 위해 미리 준비하세요';
-                statusColor = 'text-gray-500';
-                statusIcon = '→';
               } else {
-                statusMsg = '아직 준비되지 않았습니다';
-                statusIcon = '○';
+                statusMsg = `○ D-${daysUntil}`;
+                statusColor = 'text-gray-400';
               }
 
               return (
@@ -337,8 +340,19 @@ export default function HomePage() {
                 }`}>
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <h3 className={`font-semibold ${type === 'SUNDAY' ? 'text-white' : 'text-gray-900'}`}>{WORSHIP_LABEL[type] || type}{type === 'SPECIAL' && <span className="text-[#EC4899] ml-1 text-xs">✦</span>}</h3>
-                      <p className={`text-xs sm:text-sm mt-1 ${type === 'SUNDAY' ? 'text-white/80' : statusColor}`}>{statusIcon} {statusMsg}</p>
+                      <div className="flex items-center gap-2">
+                        <h3 className={`font-semibold ${type === 'SUNDAY' ? 'text-white' : 'text-gray-900'}`}>
+                          {WORSHIP_LABEL[type] || type}
+                        </h3>
+                        {type !== 'SPECIAL' && (
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                            type === 'SUNDAY' ? 'bg-white/20 text-white/80' : 'bg-gray-100 text-gray-500'
+                          }`}>
+                            {type === 'DAWN' ? '매일' : `${nextDateStr} (${nextDayName})`}
+                          </span>
+                        )}
+                      </div>
+                      <p className={`text-xs mt-1 ${type === 'SUNDAY' ? 'text-white/80' : statusColor}`}>{statusMsg}</p>
                     </div>
                     {matchingSermon ? (
                       <button
