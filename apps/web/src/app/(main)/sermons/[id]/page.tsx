@@ -562,16 +562,17 @@ ${sermon.conclusion}
         {/* ── 피드백 ── */}
         {!feedbackOpen && !feedbackSent && (
           <div className="card p-4">
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">피드백</p>
+            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">이 설교문 어떠셨나요?</p>
             <div className="flex gap-2">
               {[
-                { val: 'good', emoji: '👍' },
-                { val: 'neutral', emoji: '😐' },
-                { val: 'bad', emoji: '📝' },
+                { val: 'good', emoji: '👍', label: '만족' },
+                { val: 'neutral', emoji: '😐', label: '보통' },
+                { val: 'bad', emoji: '📝', label: '의견' },
               ].map(r => (
                 <button key={r.val} onClick={() => { setFeedbackRating(r.val); setFeedbackOpen(true); }}
-                  className="flex-1 py-2.5 rounded-xl text-lg bg-gray-50 hover:bg-gray-100 transition-all active:scale-[0.95]">
-                  {r.emoji}
+                  className="flex-1 py-2 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all active:scale-[0.95] flex flex-col items-center gap-0.5">
+                  <span className="text-base">{r.emoji}</span>
+                  <span className="text-[10px] text-gray-500">{r.label}</span>
                 </button>
               ))}
             </div>
