@@ -171,38 +171,37 @@ export default function HomePage() {
 
         {/* 절기/이벤트 알림 */}
         {upcomingEvents.length > 0 && (
-          <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/20 min-h-[140px]">
-            {/* 배경 — 따뜻한 골드 그라데이션 */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#FFF8E7] via-[#FFF3D6] to-[#EDE0C0]" />
-            {/* 우측 — 차분한 십자가+성경 이미지 */}
-            <div className="absolute right-0 top-0 bottom-0 w-1/2 sm:w-2/5">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF8E7]/70 to-transparent z-10" />
-              <img src="/images/cross-bible.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="relative overflow-hidden rounded-2xl min-h-[160px] sm:min-h-[180px]">
+            {/* 전체 배경 이미지 */}
+            <img src="/images/cross-bible.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            {/* 어두운 오버레이 — 왼쪽 진하게, 오른쪽 투명 */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#3B2510]/90 via-[#3B2510]/70 to-[#3B2510]/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#3B2510]/40 to-transparent" />
+            {/* 콘텐츠 */}
+            <div className="relative p-5 sm:p-7 z-10 flex flex-col justify-center h-full">
+              <h3 className="text-xl sm:text-2xl font-bold text-[#E8D5A8] mb-3 sm:mb-4 tracking-wide" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+                다가오는 교회 일정
+              </h3>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {upcomingEvents.map((e, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      if (e.scripture) {
+                        router.push(`/sermons/new?scripture=${encodeURIComponent(e.scripture)}&hint=${encodeURIComponent(e.label)}`);
+                      }
+                    }}
+                    className="inline-flex items-center gap-1.5 bg-[#0F1A2E]/80 backdrop-blur-sm px-3.5 py-2 rounded-xl text-sm hover:bg-[#0F1A2E] transition-all cursor-pointer border border-white/10"
+                  >
+                    <span className="text-[#C9A84C] font-semibold">{new Date(e.date).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
+                    <span className="text-white/90">{e.label}</span>
+                    {e.scripture && <span className="text-xs text-[#C9A84C] ml-0.5">📖</span>}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-[#E8D5A8]/60">클릭하시면 해당 절기에 맞는 설교를 바로 준비할 수 있습니다</p>
             </div>
-            <div className="relative p-5 sm:p-6 z-20">
-            <h3 className="text-sm font-semibold text-[#8B6914] mb-3 flex items-center gap-2">
-              <span className="w-1 h-4 bg-[#C9A84C] rounded-full" />다가오는 교회 일정
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {upcomingEvents.map((e, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    if (e.scripture) {
-                      // 설교 생성 페이지로 이동 (본문을 URL 파라미터로 전달)
-                      router.push(`/sermons/new?scripture=${encodeURIComponent(e.scripture)}&hint=${encodeURIComponent(e.label)}`);
-                    }
-                  }}
-                  className="inline-flex items-center gap-1.5 bg-white border border-[#C9A84C]/20 px-3 py-2 rounded-xl text-sm hover:bg-[#FFF3D6] hover:border-[#C9A84C]/40 transition-all cursor-pointer shadow-sm"
-                >
-                  <span className="text-amber-600 font-medium">{new Date(e.date).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
-                  <span className="text-gray-700">{e.label}</span>
-                  {e.scripture && <span className="text-xs text-amber-500 ml-1">📖</span>}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-[#8B6914]/60 mt-3">클릭하면 해당 절기에 맞는 설교를 바로 준비할 수 있습니다</p>
-          </div></div>
+          </div>
         )}
 
         {/* 이번주 예배 */}
