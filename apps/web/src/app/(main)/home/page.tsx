@@ -236,21 +236,20 @@ export default function HomePage() {
         )}
 
         {/* 나의 다가오는 일정 */}
-        {myEvents.length > 0 && (
-          <div className="relative overflow-hidden rounded-2xl bg-[#0F1A2E] p-4">
-            <div className="absolute inset-0 opacity-[0.03]" style={{ background: 'radial-gradient(circle at 90% 50%, #C9A84C 0%, transparent 50%)' }} />
-            <div className="relative z-10">
-              <h3 className="text-xs font-semibold text-[#8B9DC3] mb-2.5 flex items-center gap-2">
+        <div className="relative overflow-hidden rounded-2xl bg-[#0F1A2E] p-4">
+          <div className="absolute inset-0 opacity-[0.03]" style={{ background: 'radial-gradient(circle at 90% 50%, #C9A84C 0%, transparent 50%)' }} />
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2.5">
+              <h3 className="text-xs font-semibold text-[#8B9DC3] flex items-center gap-2">
                 <svg className="w-3.5 h-3.5 text-[#C9A84C]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                {(() => {
-                  const me = useAuthStore.getState().user;
-                  if (me?.name) {
-                    const parts = me.name.split('|');
-                    return `${parts[0]} ${parts[1] || '목사'}님 다가오는 일정`;
-                  }
-                  return '다가오는 일정';
-                })()}
+                다가오는 일정
+                <span className="text-[10px] text-[#5A6F8C] font-normal">(오늘로부터 한 달 일정이 표시됩니다)</span>
               </h3>
+              <button onClick={() => router.push('/calendar')} className="text-[10px] text-[#C9A84C] hover:text-[#D4B85C]">
+                캘린더 →
+              </button>
+            </div>
+            {myEvents.length > 0 ? (
               <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 {myEvents.map((ev) => {
                   const d = new Date(ev.date);
@@ -274,9 +273,14 @@ export default function HomePage() {
                   );
                 })}
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-3">
+                <p className="text-xs text-[#5A6F8C]">한 달 내 등록된 일정이 없습니다</p>
+                <button onClick={() => router.push('/calendar')} className="text-xs text-[#C9A84C] mt-1 hover:underline">캘린더에서 일정 등록하기</button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         {/* 이번주 예배 */}
         <section>
