@@ -174,10 +174,11 @@ export default function HomePage() {
           <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/20 min-h-[140px]">
             {/* 배경 그라데이션 */}
             <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF3D6] to-[#F5E6C8]" />
-            {/* 우측 십자가+성경 이미지 — 고화질 */}
-            <div className="absolute right-0 top-0 bottom-0 w-2/5 sm:w-1/3">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF8E7]/50 to-transparent z-10" />
-              <img src="https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=1200&q=90&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+            {/* 우측 십자가+성경 이미지 */}
+            <div className="absolute right-0 top-0 bottom-0 w-1/2 sm:w-2/5">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF8E7]/80 to-[#FFF8E7]/10 z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#FFF8E7]/40 to-transparent z-10" />
+              <img src="https://images.unsplash.com/photo-1560785218-893e43abaed3?w=800&q=90&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
             </div>
             <div className="relative p-5 sm:p-6 z-20">
             <h3 className="text-sm font-semibold text-[#8B6914] mb-3 flex items-center gap-2">
