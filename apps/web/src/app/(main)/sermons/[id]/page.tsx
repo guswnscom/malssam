@@ -469,152 +469,150 @@ ${sermon.conclusion}
           <aside className="lg:w-[280px] lg:flex-shrink-0 mt-6 lg:mt-0">
             <div className="lg:sticky lg:top-16 space-y-4">
 
-        {/* AI 수정 요청 */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 mb-4">
-          <button onClick={() => setRegenOpen(!regenOpen)} className="w-full flex items-center justify-between text-sm font-medium text-gray-700">
-            <span className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-[#C9A84C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-              AI 수정 요청 {sermon.regenerationCount > 0 && <span className="text-[#C9A84C] text-xs">({sermon.regenerationCount}/5)</span>}
-            </span>
-            <span className="text-gray-400 text-xs">{regenOpen ? '닫기' : '열기'}</span>
+        {/* ── 저장 ── */}
+        <div className="card p-4">
+          <button onClick={handleSave} disabled={saving} className="btn-gold w-full py-3 text-sm flex items-center justify-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+            {saving ? '저장 중...' : '저장하기'}
+          </button>
+        </div>
+
+        {/* ── 내보내기 ── */}
+        <div className="card p-4">
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">내보내기</p>
+          <div className="space-y-2">
+            <button onClick={handlePptPrompt} className="btn-primary w-full py-2.5 text-xs flex items-center justify-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+              PPT 프롬프트
+            </button>
+            <button onClick={handleExportPdf} className="btn-primary w-full py-2.5 text-xs flex items-center justify-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              PDF 저장 및 보기
+            </button>
+            <button onClick={handleShare} className="btn-secondary w-full py-2.5 text-xs flex items-center justify-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+              공유
+            </button>
+          </div>
+        </div>
+
+        {/* ── AI 도구 ── */}
+        <div className="card p-4">
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">AI 도구</p>
+          {/* AI 최종검토 */}
+          {reviewLoading ? (
+            <div className="py-4 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="w-4 h-4 border-2 border-[#C9A84C]/30 border-t-[#C9A84C] rounded-full animate-spin" />
+                <span className="text-xs font-semibold text-[#C9A84C]">검토 중...</span>
+              </div>
+              <div className="w-full bg-gray-100 rounded-full h-1.5 mb-1">
+                <div className="bg-[#C9A84C] h-1.5 rounded-full transition-all duration-1000" style={{ width: `${Math.min(95, (reviewSec / 60) * 100)}%` }} />
+              </div>
+              <p className="text-[10px] text-gray-400">{reviewSec}초 경과</p>
+            </div>
+          ) : (
+            <button onClick={handleFinalReview} disabled={sermon.regenerationCount >= 5 || regenLoading}
+              className="btn-gold w-full py-2.5 text-xs flex items-center justify-center gap-2 mb-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              AI 최종검토
+            </button>
+          )}
+          {/* AI 수정 요청 */}
+          <button onClick={() => setRegenOpen(!regenOpen)} className="w-full py-2.5 btn-secondary text-xs flex items-center justify-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            수정 요청 {sermon.regenerationCount > 0 && <span className="text-[#C9A84C]">({sermon.regenerationCount}/5)</span>}
           </button>
           {regenOpen && (
-            <div className="mt-4 space-y-3">
-              <select value={regenSection} onChange={e => setRegenSection(e.target.value)} className="w-full px-3 py-2 rounded-lg border text-sm">
+            <div className="mt-3 space-y-2">
+              <select value={regenSection} onChange={e => setRegenSection(e.target.value)} className="input text-xs py-2">
                 <option value="FULL">전체</option><option value="INTRODUCTION">서론</option>
                 <option value="OUTLINE_1">대지 1</option><option value="OUTLINE_2">대지 2</option><option value="OUTLINE_3">대지 3</option>
                 <option value="APPLICATION">적용</option><option value="CONCLUSION">결론</option>
               </select>
-              <textarea value={regenFeedback} onChange={e => setRegenFeedback(e.target.value)} className="w-full px-3 py-3 rounded-lg border text-sm resize-none" rows={3} maxLength={500} placeholder="예: 결론을 더 따뜻하게" />
+              <textarea value={regenFeedback} onChange={e => setRegenFeedback(e.target.value)} className="input text-xs resize-none" rows={2} maxLength={500} placeholder="예: 결론을 더 따뜻하게" />
               <button onClick={handleRegen} disabled={regenLoading || reviewLoading || !regenFeedback.trim() || sermon.regenerationCount >= 5}
-                className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium disabled:bg-blue-300">
+                className="btn-primary w-full py-2 text-xs">
                 {regenLoading ? '재생성 중...' : '재생성'}
               </button>
             </div>
           )}
         </div>
 
-        {/* 액션 버튼 */}
-        <div className="bg-[#0F1A2E] rounded-2xl p-4 sm:p-5 mb-4">
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-3">
-            {[
-              { onClick: handleSave, label: saving ? '저장중...' : '저장', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>', gradient: 'from-[#C9A84C] to-[#8B6914]', disabled: saving },
-              { onClick: handlePptPrompt, label: 'PPT', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>', gradient: 'from-[#F59E0B] to-[#D97706]' },
-              { onClick: handleExportPdf, label: 'PDF', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', gradient: 'from-[#3B82F6] to-[#2563EB]' },
-              { onClick: handleShare, label: '공유', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>', gradient: 'from-[#8B5CF6] to-[#6D28D9]' },
-              { onClick: () => setShowDelete(true), label: '삭제', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>', gradient: 'from-[#EF4444] to-[#DC2626]' },
-            ].map((btn, i) => (
-              <button key={i} onClick={btn.onClick} disabled={btn.disabled}
-                className={`py-3 rounded-xl text-xs font-bold text-white bg-gradient-to-r ${btn.gradient} hover:opacity-90 disabled:opacity-40 transition-all flex items-center justify-center gap-1.5`}
-                style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: btn.icon }} />
-                {btn.label}
-              </button>
-            ))}
-          </div>
-          {reviewLoading ? (
-            <div className="w-full py-4 rounded-xl bg-[#1B2D4A] text-center">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <div className="w-5 h-5 border-2 border-[#C9A84C]/30 border-t-[#C9A84C] rounded-full animate-spin" />
-                <span className="text-sm font-semibold text-[#C9A84C]">AI가 검토 중입니다...</span>
-              </div>
-              <div className="w-48 mx-auto bg-[#0F1A2E] rounded-full h-2 mb-1">
-                <div className="bg-gradient-to-r from-[#C9A84C] to-[#F59E0B] h-2 rounded-full transition-all duration-1000" style={{ width: `${Math.min(95, (reviewSec / 60) * 100)}%` }} />
-              </div>
-              <p className="text-xs text-[#5A6F8C] mt-1">경과: {reviewSec}초 | 평균 30~60초</p>
-            </div>
-          ) : (
-            <button onClick={handleFinalReview} disabled={sermon.regenerationCount >= 5 || regenLoading}
-              className="w-full py-3.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#C9A84C] to-[#8B6914] text-white hover:opacity-90 disabled:opacity-40 transition-all flex items-center justify-center gap-2"
-              style={{ boxShadow: '0 4px 14px rgba(201,168,76,0.3)' }}>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-              AI 최종검토
-            </button>
-          )}
-        </div>
-
-        {/* AI 검토 비교 결과 */}
+        {/* AI 검토 결과 */}
         {reviewResult && (
-          <div className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-4">
-            <h3 className="font-semibold text-purple-900 mb-3">🔍 AI 최종검토 결과</h3>
-            <div className="space-y-2 mb-4">
+          <div className="card p-4 border-[#C9A84C]/30">
+            <p className="text-xs font-bold text-[#0F1A2E] mb-2">검토 결과</p>
+            <div className="space-y-1 mb-3">
               {reviewResult.changes.map((c, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm text-purple-800">
-                  <span className="text-purple-500 flex-shrink-0">✓</span> {c}
-                </div>
+                <p key={i} className="text-[11px] text-gray-600 flex items-start gap-1.5">
+                  <span className="text-[#C9A84C] mt-0.5">✓</span> {c}
+                </p>
               ))}
             </div>
             <div className="flex gap-2">
               <button onClick={() => { setSermon(reviewResult.before as any); setReviewResult(null); }}
-                className="flex-1 py-2 rounded-lg text-sm font-medium border border-purple-300 text-purple-700 hover:bg-purple-100">
-                ↩ 수정 전 버전으로 되돌리기
-              </button>
+                className="btn-secondary flex-1 py-2 text-[11px]">되돌리기</button>
               <button onClick={() => setReviewResult(null)}
-                className="flex-1 py-2 rounded-lg text-sm font-medium bg-purple-600 text-white hover:bg-purple-700">
-                ✓ 수정 후 버전 유지
-              </button>
+                className="btn-primary flex-1 py-2 text-[11px]">유지</button>
             </div>
           </div>
         )}
 
-        {/* 설교 피드백 */}
+        {/* ── 피드백 ── */}
         {!feedbackOpen && !feedbackSent && (
-          <div className="bg-gradient-to-r from-[#0F1A2E] to-[#1B2D4A] rounded-2xl p-5 mb-4">
-            <p className="text-sm font-semibold text-white mb-3">이 설교문 어떠셨나요?</p>
+          <div className="card p-4">
+            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">피드백</p>
             <div className="flex gap-2">
-              <button onClick={() => { setFeedbackRating('good'); setFeedbackOpen(true); }}
-                className="flex-1 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-[#059669] to-[#047857] text-white transition-all hover:opacity-90 flex flex-col items-center gap-1" style={{ boxShadow: '0 4px 14px rgba(5,150,105,0.3)' }}>
-                <span className="text-lg">👍</span><span className="text-[10px]">괜찮아요</span>
-              </button>
-              <button onClick={() => { setFeedbackRating('neutral'); setFeedbackOpen(true); }}
-                className="flex-1 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white transition-all hover:opacity-90 flex flex-col items-center gap-1" style={{ boxShadow: '0 4px 14px rgba(245,158,11,0.3)' }}>
-                <span className="text-lg">🔄</span><span className="text-[10px]">개선 필요</span>
-              </button>
-              <button onClick={() => { setFeedbackRating('bad'); setFeedbackOpen(true); }}
-                className="flex-1 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-[#C9A84C] to-[#8B6914] text-white transition-all hover:opacity-90 flex flex-col items-center gap-1" style={{ boxShadow: '0 4px 14px rgba(201,168,76,0.3)' }}>
-                <span className="text-lg">📝</span><span className="text-[10px]">의견 남기기</span>
-              </button>
+              {[
+                { val: 'good', emoji: '👍' },
+                { val: 'neutral', emoji: '😐' },
+                { val: 'bad', emoji: '📝' },
+              ].map(r => (
+                <button key={r.val} onClick={() => { setFeedbackRating(r.val); setFeedbackOpen(true); }}
+                  className="flex-1 py-2.5 rounded-xl text-lg bg-gray-50 hover:bg-gray-100 transition-all active:scale-[0.95]">
+                  {r.emoji}
+                </button>
+              ))}
             </div>
           </div>
         )}
 
-        {/* 피드백 입력 모달 */}
         {feedbackOpen && (
-          <div className="bg-white rounded-2xl border border-[#C9A84C]/20 shadow-sm p-5 mb-4">
+          <div className="card p-4">
             {feedbackSent ? (
-              <div className="text-center py-3">
-                <p className="text-lg font-bold text-[#0F1A2E]">감사합니다! 🙏</p>
-                <p className="text-sm text-gray-500 mt-1">소중한 의견이 제품 개선에 반영됩니다</p>
-              </div>
+              <p className="text-xs text-center text-gray-500 py-2">감사합니다 🙏</p>
             ) : (
               <>
-                <p className="text-sm font-medium text-gray-700 mb-3">추가 의견을 남겨주세요</p>
-                <div className="flex gap-2 mb-3">
+                <div className="flex gap-1.5 mb-2">
                   {[
-                    { val: 'good', emoji: '👍', label: '만족' },
-                    { val: 'neutral', emoji: '😐', label: '보통' },
-                    { val: 'bad', emoji: '👎', label: '불만족' },
+                    { val: 'good', label: '만족' },
+                    { val: 'neutral', label: '보통' },
+                    { val: 'bad', label: '불만족' },
                   ].map(r => (
                     <button key={r.val} onClick={() => setFeedbackRating(r.val)}
-                      className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${feedbackRating === r.val ? 'bg-[#0F1A2E] text-[#C9A84C]' : 'bg-gray-100 text-gray-600'}`}>
-                      {r.emoji} {r.label}
+                      className={`flex-1 py-1.5 rounded-lg text-[11px] font-medium transition-all ${feedbackRating === r.val ? 'bg-[#0F1A2E] text-[#C9A84C]' : 'bg-gray-50 text-gray-500'}`}>
+                      {r.label}
                     </button>
                   ))}
                 </div>
-                <textarea className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#C9A84C]/30 focus:border-[#C9A84C] outline-none text-sm resize-none" rows={3} maxLength={500}
-                  placeholder="실제 설교에 사용 가능하셨나요? 어떤 부분이 좋았나요?" value={feedbackText} onChange={e => setFeedbackText(e.target.value)} />
-                <div className="flex gap-2 mt-3">
-                  <button onClick={() => { setFeedbackOpen(false); setFeedbackRating(''); }} className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-700">취소</button>
-                  <button onClick={handleSermonFeedback} className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-[#C9A84C] text-[#0F1A2E]">보내기</button>
+                <textarea className="input text-xs resize-none mb-2" rows={2} maxLength={500} placeholder="의견을 남겨주세요" value={feedbackText} onChange={e => setFeedbackText(e.target.value)} />
+                <div className="flex gap-2">
+                  <button onClick={() => { setFeedbackOpen(false); setFeedbackRating(''); }} className="btn-secondary flex-1 py-2 text-xs">취소</button>
+                  <button onClick={handleSermonFeedback} className="btn-gold flex-1 py-2 text-xs">보내기</button>
                 </div>
               </>
             )}
           </div>
         )}
 
-        <div className="flex gap-3">
-          <button onClick={() => router.push('/sermons/new')} className="flex-1 py-3 btn-gold text-sm">새 설교</button>
-          <button onClick={() => router.push('/home')} className="px-6 py-3 btn-secondary text-sm">홈</button>
+        {/* ── 하단 네비 ── */}
+        <div className="space-y-2">
+          <button onClick={() => router.push('/sermons/new')} className="btn-gold w-full py-3 text-sm">새 설교</button>
+          <div className="flex gap-2">
+            <button onClick={() => router.push('/home')} className="btn-secondary flex-1 py-2.5 text-xs">홈</button>
+            <button onClick={() => setShowDelete(true)} className="flex-1 py-2.5 rounded-xl text-xs font-medium text-red-500 bg-red-50 hover:bg-red-100 transition-all">삭제</button>
+          </div>
         </div>
 
             </div>{/* sticky wrapper end */}
