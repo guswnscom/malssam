@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import PageHelp, { HelpButton, HELP_DATA } from '@/components/PageHelp';
 
 interface CalEvent {
   id: string; title: string; date: string; endDate?: string;
@@ -85,7 +86,10 @@ export default function CalendarPage() {
           <svg width="80" height="80" viewBox="0 0 24 24" fill="#C9A84C"><path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z"/></svg>
         </div>
         <div className="max-w-4xl mx-auto flex items-center justify-between relative">
-          <button onClick={() => router.push('/home')} className="text-[#8B9DC3] hover:text-white">← 홈</button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => router.push('/home')} className="text-[#8B9DC3] hover:text-white">← 홈</button>
+            <HelpButton pageKey="calendar" steps={HELP_DATA.calendar} />
+          </div>
           <h1 className="text-lg font-semibold text-white">교회 캘린더</h1>
           <button onClick={() => { setShowAdd(true); setNewEvent(prev => ({ ...prev, date: selectedDate || getDateStr(today.getDate()) })); }}
             className="bg-[#C9A84C] text-[#0F1A2E] px-3 py-1.5 rounded-xl text-sm font-bold hover:bg-[#D4B85C]">
@@ -282,6 +286,7 @@ export default function CalendarPage() {
           </div>
         </div>
       )}
+      <PageHelp pageKey="calendar" steps={HELP_DATA.calendar} />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { api } from '@/lib/api';
+import PageHelp, { HelpButton, HELP_DATA } from '@/components/PageHelp';
 
 interface OutlinePoint { point: number; title: string; content: string; }
 interface Citation { id: string; type: string; author: string; title: string; }
@@ -363,7 +364,7 @@ ${sermon.conclusion}
         <div className="max-w-3xl mx-auto flex items-center justify-between relative">
           <button onClick={() => router.push('/sermons')} className="text-[#8B9DC3] text-sm hover:text-white">← 목록</button>
           <span className="text-xs sm:text-sm text-[#C9A84C]">{WL[sermon.worshipType]} · {dateStr}</span>
-          <div className="w-12" />
+          <HelpButton pageKey="sermonDetail" steps={HELP_DATA.sermonDetail} />
         </div>
       </header>
 
@@ -561,6 +562,8 @@ ${sermon.conclusion}
           <button onClick={() => router.push('/home')} className="px-6 py-3 rounded-xl text-gray-700 bg-white border border-gray-200 hover:bg-gray-50">홈</button>
         </div>
       </main>
+
+      <PageHelp pageKey="sermonDetail" steps={HELP_DATA.sermonDetail} />
 
       {showDelete && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">

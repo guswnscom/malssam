@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { api } from '@/lib/api';
-import TutorialModal from '@/components/TutorialModal';
+import PageHelp, { HelpButton, HELP_DATA } from '@/components/PageHelp';
 import { useAuthStore } from '@/stores/auth-store';
 
 interface ChurchData {
@@ -68,7 +68,6 @@ export default function HomePage() {
   const [usageStats, setUsageStats] = useState<any>(null);
   const [myEvents, setMyEvents] = useState<Array<{ id: string; title: string; date: string; eventType: string; description?: string; reminderDays?: number[] }>>([]);
   const [loading, setLoading] = useState(true);
-  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,10 +111,6 @@ export default function HomePage() {
           .slice(0, 5);
         setMyEvents(upcoming);
 
-        // 첫 로그인 시 튜토리얼 표시
-        if (!localStorage.getItem('tutorialSeen')) {
-          setShowTutorial(true);
-        }
       } catch {
         router.push('/login');
       } finally {
@@ -183,7 +178,8 @@ export default function HomePage() {
               })()}
             </p>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <HelpButton pageKey="home" steps={HELP_DATA.home} />
             <span className="bg-[#C9A84C]/20 text-[#C9A84C] px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold border border-[#C9A84C]/30">
               BETA
             </span>
@@ -444,10 +440,8 @@ export default function HomePage() {
                 { href: '/admin', label: '관리자', desc: '대시보드',
                   icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>' },
               ] : []),
-              { href: '#tutorial', label: '사용법', desc: '앱 사용 안내',
-                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>' },
             ].map(item => (
-              <button key={item.href} onClick={() => item.href === '#tutorial' ? setShowTutorial(true) : router.push(item.href)}
+              <button key={item.href} onClick={() => router.push(item.href)}
                 className="bg-[#0F1A2E] p-4 rounded-2xl text-center hover:bg-[#1B2D4A] transition-all">
                 <div className="w-12 h-12 border border-[#C9A84C]/30 rounded-2xl flex items-center justify-center mx-auto mb-2.5">
                   <svg className="w-6 h-6 text-[#C9A84C]" fill="none" stroke="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: item.icon }} />
@@ -506,8 +500,8 @@ export default function HomePage() {
         </section>
       </main>
 
-      {/* 튜토리얼 모달 */}
-      {showTutorial && <TutorialModal onClose={() => setShowTutorial(false)} />}
+      {/* 페이지별 도움말 */}
+      <PageHelp pageKey="home" steps={HELP_DATA.home} />
     </div>
   );
 }

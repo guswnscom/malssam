@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
+import PageHelp, { HelpButton, HELP_DATA } from '@/components/PageHelp';
 
 const WORSHIP_TYPES = [
   { value: 'SUNDAY', label: '주일예배', desc: '주일 아침, 온 성도가 함께하는 예배', color: 'from-[#C9A84C] to-[#8B6914]', accent: '#C9A84C',
@@ -172,7 +173,7 @@ function NewSermonPage() {
             ← 홈
           </button>
           <h1 className="text-lg font-semibold text-white">새 설교 만들기</h1>
-          <div className="w-12" />
+          <HelpButton pageKey="sermonNew" steps={HELP_DATA.sermonNew} />
         </div>
       </header>
 
@@ -382,6 +383,7 @@ function NewSermonPage() {
           )}
         </div>
       </main>
+      <PageHelp pageKey="sermonNew" steps={HELP_DATA.sermonNew} />
     </div>
   );
 }

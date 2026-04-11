@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import PageHelp, { HelpButton, HELP_DATA } from '@/components/PageHelp';
 
 interface SermonItem {
   id: string;
@@ -134,7 +135,10 @@ export default function SermonsListPage() {
           <svg width="80" height="80" viewBox="0 0 24 24" fill="#C9A84C"><path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z"/></svg>
         </div>
         <div className="max-w-3xl mx-auto flex items-center justify-between relative">
-          <button onClick={() => router.push('/home')} className="text-[#8B9DC3] hover:text-white text-sm">← 홈</button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => router.push('/home')} className="text-[#8B9DC3] hover:text-white text-sm">← 홈</button>
+            <HelpButton pageKey="sermonList" steps={HELP_DATA.sermonList} />
+          </div>
           <h1 className="text-lg font-semibold text-white">설교 캐비넷</h1>
           <button onClick={() => router.push('/sermons/new')} className="bg-[#C9A84C] text-[#0F1A2E] px-4 py-2 rounded-xl text-sm font-bold hover:bg-[#D4B85C]">
             + 새 설교
@@ -273,6 +277,7 @@ export default function SermonsListPage() {
           </div>
         )}
       </main>
+      <PageHelp pageKey="sermonList" steps={HELP_DATA.sermonList} />
     </div>
   );
 }
