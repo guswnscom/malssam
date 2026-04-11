@@ -368,9 +368,9 @@ ${sermon.conclusion}
   };
 
   const Section = ({ k, label, text, bg = '', enrich = false }: { k: string; label: string; text: string; bg?: string; enrich?: boolean }) => (
-    <section className="mb-5">
+    <section className="mb-6">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-base sm:text-lg font-semibold text-gray-900">{label}</h2>
+        {label && <h2 className="text-sm font-bold text-[#0F1A2E] uppercase tracking-wider">{label}</h2>}
         {enrich && (
           <button onClick={() => handleEnrich(parseInt(k.split('_')[1]))} disabled={!!enrichLoading}
             className="text-xs text-[#0F1A2E] px-3 py-1.5 bg-[#FFF8E7] border border-[#C9A84C]/30 rounded-xl hover:bg-[#C9A84C]/20 disabled:opacity-50 flex items-center gap-1.5 font-medium transition-colors">
@@ -384,16 +384,16 @@ ${sermon.conclusion}
       </div>
       {editingKey === k ? (
         <div className="space-y-2">
-          <textarea className="w-full p-4 rounded-xl border border-blue-300 focus:ring-2 focus:ring-blue-500 outline-none resize-none text-sm" rows={8} value={editVal} onChange={e => setEditVal(e.target.value)} />
+          <textarea className="input text-[15px] leading-[1.9] resize-none" rows={8} value={editVal} onChange={e => setEditVal(e.target.value)} />
           <div className="flex gap-2">
-            <button onClick={saveEdit} disabled={saving} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm disabled:bg-blue-300">{saving ? '저장중...' : '저장'}</button>
-            <button onClick={() => setEditingKey('')} className="text-gray-500 px-4 py-2 text-sm">취소</button>
+            <button onClick={saveEdit} disabled={saving} className="btn-primary px-4 py-2 text-sm">{saving ? '저장중...' : '저장'}</button>
+            <button onClick={() => setEditingKey('')} className="btn-secondary px-4 py-2 text-sm">취소</button>
           </div>
         </div>
       ) : (
-        <div onClick={() => startEdit(k, text)} className={`${bg || 'bg-white'} rounded-2xl border border-gray-100 p-4 sm:p-5 cursor-pointer hover:border-[#C9A84C]/30 hover:shadow-sm transition-all group`}>
-          <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{text}</p>
-          <p className="text-xs text-gray-300 mt-2 opacity-0 group-hover:opacity-100">클릭하여 편집</p>
+        <div onClick={() => startEdit(k, text)} className={`${bg || 'bg-white'} card p-4 sm:p-5 cursor-pointer group`}>
+          <p className="text-gray-700 text-[15px] leading-[1.9] whitespace-pre-line">{text}</p>
+          <p className="text-[10px] text-gray-300 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">클릭하여 편집</p>
         </div>
       )}
     </section>
@@ -415,35 +415,38 @@ ${sermon.conclusion}
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
-        {/* 성경 본문 */}
-        <div className="bg-[#0F1A2E] rounded-2xl p-5 sm:p-6 mb-6">
-          <span className="text-[#C9A84C] font-semibold text-sm">📖 {sermon.scripture}</span>
-          {sermon.scriptureText ? (
-            <div className="text-sm text-[#D1D5DB] leading-relaxed whitespace-pre-line border-l-2 border-[#C9A84C]/40 pl-3 mt-3">{sermon.scriptureText}</div>
-          ) : (
-            <p className="text-sm text-[#5A6F8C] italic mt-2">성경 원문은 새로 생성한 설교에서 표시됩니다.</p>
-          )}
-        </div>
-
-        {/* 제목 */}
-        {editingKey === 'title' ? (
-          <div className="mb-4 space-y-2">
-            <input className="w-full text-2xl font-bold p-2 border border-blue-300 rounded-lg" value={editVal} onChange={e => setEditVal(e.target.value)} />
-            <div className="flex gap-2">
-              <button onClick={saveEdit} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">저장</button>
-              <button onClick={() => setEditingKey('')} className="text-gray-500 px-4 py-2 text-sm">취소</button>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        <div className="lg:flex lg:gap-8">
+          {/* ═══ 좌측: 설교 본문 (읽기 영역) ═══ */}
+          <main className="lg:flex-1 lg:max-w-3xl">
+            {/* 성경 본문 */}
+            <div className="bg-[#0F1A2E] rounded-2xl p-5 sm:p-6 mb-6">
+              <span className="text-[#C9A84C] font-semibold text-sm">📖 {sermon.scripture}</span>
+              {sermon.scriptureText ? (
+                <div className="text-sm text-[#D1D5DB] leading-[1.9] whitespace-pre-line border-l-2 border-[#C9A84C]/40 pl-4 mt-3">{sermon.scriptureText}</div>
+              ) : (
+                <p className="text-sm text-[#5A6F8C] italic mt-2">성경 원문은 새로 생성한 설교에서 표시됩니다.</p>
+              )}
             </div>
-          </div>
-        ) : (
-          <h1 onClick={() => startEdit('title', sermon.title)} className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 cursor-pointer hover:text-blue-800">{sermon.title}</h1>
-        )}
 
-        <Section k="summary" label="" text={sermon.summary} />
-        <Section k="introduction" label="서론" text={sermon.introduction} />
-        {sermon.outline.map((p, i) => <Section key={i} k={`outline_${i}`} label={`${p.point}. ${p.title}`} text={p.content} enrich={true} />)}
-        <Section k="application" label="적용" text={sermon.application} bg="bg-amber-50 border-amber-100" />
-        <Section k="conclusion" label="결론" text={sermon.conclusion} />
+            {/* 제목 */}
+            {editingKey === 'title' ? (
+              <div className="mb-6 space-y-2">
+                <input className="input text-2xl font-bold p-3" value={editVal} onChange={e => setEditVal(e.target.value)} />
+                <div className="flex gap-2">
+                  <button onClick={saveEdit} className="btn-primary px-4 py-2 text-sm">{saving ? '저장중...' : '저장'}</button>
+                  <button onClick={() => setEditingKey('')} className="btn-secondary px-4 py-2 text-sm">취소</button>
+                </div>
+              </div>
+            ) : (
+              <h1 onClick={() => startEdit('title', sermon.title)} className="heading-serif text-2xl sm:text-3xl text-gray-900 mb-6 cursor-pointer hover:text-[#C9A84C] transition-colors">{sermon.title}</h1>
+            )}
+
+            <Section k="summary" label="" text={sermon.summary} />
+            <Section k="introduction" label="서론" text={sermon.introduction} />
+            {sermon.outline.map((p, i) => <Section key={i} k={`outline_${i}`} label={`${p.point}. ${p.title}`} text={p.content} enrich={true} />)}
+            <Section k="application" label="적용" text={sermon.application} bg="bg-amber-50/50 border-amber-100" />
+            <Section k="conclusion" label="결론" text={sermon.conclusion} />
 
         {/* 참고자료 */}
         {sermon.citations.length > 0 && (
@@ -460,6 +463,11 @@ ${sermon.conclusion}
             </div>
           </section>
         )}
+          </main>
+
+          {/* ═══ 우측: 액션 패널 (데스크톱에서 sticky) ═══ */}
+          <aside className="lg:w-[280px] lg:flex-shrink-0 mt-6 lg:mt-0">
+            <div className="lg:sticky lg:top-16 space-y-4">
 
         {/* AI 수정 요청 */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 mb-4">
@@ -605,10 +613,14 @@ ${sermon.conclusion}
         )}
 
         <div className="flex gap-3">
-          <button onClick={() => router.push('/sermons/new')} className="flex-1 py-3 rounded-xl font-semibold bg-[#C9A84C] text-[#0F1A2E] hover:bg-[#D4B85C]">새 설교</button>
-          <button onClick={() => router.push('/home')} className="px-6 py-3 rounded-xl text-gray-700 bg-white border border-gray-200 hover:bg-gray-50">홈</button>
+          <button onClick={() => router.push('/sermons/new')} className="flex-1 py-3 btn-gold text-sm">새 설교</button>
+          <button onClick={() => router.push('/home')} className="px-6 py-3 btn-secondary text-sm">홈</button>
         </div>
-      </main>
+
+            </div>{/* sticky wrapper end */}
+          </aside>{/* aside end */}
+        </div>{/* flex end */}
+      </div>{/* max-w container end */}
 
       <PageHelp pageKey="sermonDetail" steps={HELP_DATA.sermonDetail} />
 
