@@ -377,7 +377,7 @@ function NewSermonPage() {
               disabled={!canNext()}
               className="flex-1 py-3.5 rounded-xl font-bold bg-[#C9A84C] text-[#0F1A2E] hover:bg-[#D4B85C] disabled:bg-gray-300 disabled:text-gray-500 transition-colors text-sm"
             >
-              ✝ 설교 생성하기
+              설교 생성하기
             </button>
           )}
         </div>

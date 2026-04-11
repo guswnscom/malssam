@@ -303,7 +303,7 @@ export default function HomePage() {
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#C9A84C]/40 to-transparent" />
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold text-gray-900 truncate">{s.title} <span className="text-[#C9A84C]">✝</span></h3>
+                      <h3 className="font-semibold text-gray-900 truncate">{s.title}</h3>
                       <p className="text-sm text-gray-500 mt-0.5">📖 {s.scripture}</p>
                     </div>
                     <span className={`flex-shrink-0 text-xs px-2.5 py-1 rounded-lg font-medium ${TAG_COLORS[s.worshipType] || 'bg-gray-200 text-gray-700'}`}>
