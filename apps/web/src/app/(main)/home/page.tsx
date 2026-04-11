@@ -322,49 +322,32 @@ export default function HomePage() {
         {/* 빠른 작업 */}
         <section>
           <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2"><span className="w-1 h-4 bg-[#0F1A2E] rounded-full" />빠른 작업</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {[
-              { href: '/sermons/new', label: '새 설교', desc: '설교 초안 생성', gradient: 'from-[#C9A84C] to-[#8B6914]', shadow: '#C9A84C',
+              { href: '/sermons/new', label: '새 설교', desc: '설교 초안 생성',
                 icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 2v8m0 4v8m-6-14h12M6 18h12"/>' },
-              { href: '/sermons', label: '설교 캐비넷', desc: '저장된 설교 관리', gradient: 'from-[#3B82F6] to-[#1D4ED8]', shadow: '#3B82F6',
+              { href: '/sermons', label: '설교 캐비넷', desc: '저장된 설교 관리',
                 icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>' },
-              { href: '/sermons/analyze', label: '설교 분석', desc: 'AI 분석 및 개선', gradient: 'from-[#059669] to-[#047857]', shadow: '#059669',
+              { href: '/sermons/analyze', label: '설교 분석', desc: 'AI 분석 및 개선',
                 icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>' },
-              { href: '/calendar', label: '캘린더', desc: '교회 일정 관리', gradient: 'from-[#8B5CF6] to-[#6D28D9]', shadow: '#8B5CF6',
+              { href: '/calendar', label: '캘린더', desc: '교회 일정 관리',
                 icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>' },
+              ...(membership.role === 'CHURCH_ADMIN' ? [
+                { href: '/billing', label: '요금제', desc: '구독 및 피드백',
+                  icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>' },
+                { href: '/admin', label: '관리자', desc: '대시보드',
+                  icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>' },
+              ] : []),
             ].map(item => (
               <button key={item.href} onClick={() => router.push(item.href)}
-                className="bg-[#0F1A2E] p-5 rounded-2xl text-left hover:bg-[#1B2D4A] transition-all group relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-20 h-20 opacity-[0.06]" style={{ background: `radial-gradient(circle at 100% 0%, ${item.shadow} 0%, transparent 70%)` }} />
-                <div className={`w-11 h-11 bg-gradient-to-br ${item.gradient} rounded-xl flex items-center justify-center mb-3`} style={{ boxShadow: `0 4px 14px ${item.shadow}33` }}>
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: item.icon }} />
+                className="bg-[#0F1A2E] p-4 rounded-2xl text-center hover:bg-[#1B2D4A] transition-all">
+                <div className="w-12 h-12 border border-[#C9A84C]/30 rounded-2xl flex items-center justify-center mx-auto mb-2.5">
+                  <svg className="w-6 h-6 text-[#C9A84C]" fill="none" stroke="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: item.icon }} />
                 </div>
-                <span className="text-sm font-bold text-white block">{item.label}</span>
+                <span className="text-xs font-bold text-white block">{item.label}</span>
                 <span className="text-[10px] text-[#5A6F8C] mt-0.5 block">{item.desc}</span>
               </button>
             ))}
-            {membership.role === 'CHURCH_ADMIN' && (
-              <>
-                <button onClick={() => router.push('/billing')}
-                  className="bg-[#0F1A2E] p-5 rounded-2xl text-left hover:bg-[#1B2D4A] transition-all relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-20 h-20 opacity-[0.06]" style={{ background: 'radial-gradient(circle at 100% 0%, #F59E0B 0%, transparent 70%)' }} />
-                  <div className="w-11 h-11 bg-gradient-to-br from-[#F59E0B] to-[#D97706] rounded-xl flex items-center justify-center mb-3" style={{ boxShadow: '0 4px 14px #F59E0B33' }}>
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                  </div>
-                  <span className="text-sm font-bold text-white block">요금제</span>
-                  <span className="text-[10px] text-[#5A6F8C] mt-0.5 block">구독 및 피드백</span>
-                </button>
-                <button onClick={() => router.push('/admin')}
-                  className="bg-[#0F1A2E] p-5 rounded-2xl text-left hover:bg-[#1B2D4A] transition-all relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-20 h-20 opacity-[0.06]" style={{ background: 'radial-gradient(circle at 100% 0%, #EF4444 0%, transparent 70%)' }} />
-                  <div className="w-11 h-11 bg-gradient-to-br from-[#EF4444] to-[#DC2626] rounded-xl flex items-center justify-center mb-3" style={{ boxShadow: '0 4px 14px #EF444433' }}>
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                  </div>
-                  <span className="text-sm font-bold text-white block">관리자</span>
-                  <span className="text-[10px] text-[#5A6F8C] mt-0.5 block">대시보드</span>
-                </button>
-              </>
-            )}
           </div>
         </section>
 
