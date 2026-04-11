@@ -6,10 +6,9 @@ import { api } from '@/lib/api';
 import { useToast } from '@/components/Toast';
 
 const PLANS = [
-  { key: 'FREE', label: '무료', price: '0원', desc: '5편', features: ['설교 생성 5편', 'PDF 출력', '설교 분석'], color: 'border-gray-200', badge: '' },
-  { key: 'SEED', label: '새싹', price: '5만원', desc: '5편', features: ['설교 생성 5편', 'PDF 출력', '설교 분석', 'PPT 프롬프트'], color: 'border-[#C9A84C]/40', badge: '' },
-  { key: 'GROWTH', label: '성장', price: '10만원', desc: '10편', features: ['설교 생성 10편', 'PDF 출력', '설교 분석', 'PPT 프롬프트', 'AI 최종검토'], color: 'border-[#3B82F6]/40', badge: '추천' },
-  { key: 'STANDARD', label: '표준', price: '20만원', desc: '20편', features: ['설교 생성 20편', 'PDF 출력', '설교 분석', 'PPT 프롬프트', 'AI 최종검토', '우선 지원'], color: 'border-[#8B5CF6]/40', badge: '' },
+  { key: 'FREE', label: '무료', price: '0원', desc: '시작하기', features: ['설교 생성 3편', '설교 분석 2회', 'PDF 출력', '기본 도움말'], color: 'border-gray-200', badge: '' },
+  { key: 'BASIC', label: '기본', price: '29,000원/월', desc: '소형 교회', features: ['설교 생성 15편/월', '설교 분석 무제한', 'PPT 프롬프트', 'PDF 출력', 'AI 최종검토', '캘린더 일정관리'], color: 'border-[#C9A84C]/40', badge: '가장 인기' },
+  { key: 'PREMIUM', label: '프리미엄', price: '49,000원/월', desc: '중대형 교회', features: ['설교 생성 무제한', '설교 분석 무제한', 'PPT 프롬프트', 'PDF 출력', 'AI 최종검토', '캘린더 일정관리', '목회자 3인 사용', '우선 지원'], color: 'border-[#3B82F6]/40', badge: '' },
 ];
 
 export default function BillingPage() {

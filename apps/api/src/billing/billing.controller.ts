@@ -16,4 +16,9 @@ export class BillingController {
   activate(@Request() req: any) {
     return this.billingService.activate(req.user.sub);
   }
+
+  @Get('usage')
+  getUsage(@Request() req: any) {
+    return this.billingService.getUsage(req.user.sub);
+  }
 }

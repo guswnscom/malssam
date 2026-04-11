@@ -67,6 +67,7 @@ export default function HomePage() {
   const [recentSermons, setRecentSermons] = useState<SermonItem[]>([]);
   const [usageStats, setUsageStats] = useState<any>(null);
   const [myEvents, setMyEvents] = useState<Array<{ id: string; title: string; date: string; eventType: string; description?: string; reminderDays?: number[] }>>([]);
+  const [billingUsage, setBillingUsage] = useState<{ plan: string; usedSermons: number; maxSermons: number; remainingSermons: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -84,16 +85,18 @@ export default function HomePage() {
         const nextMonth = thisMonth === 12 ? 1 : thisMonth + 1;
         const nextYear = thisMonth === 12 ? thisYear + 1 : thisYear;
 
-        const [churchRes, sermonsRes, statsRes, eventsThisRes, eventsNextRes] = await Promise.all([
+        const [churchRes, sermonsRes, statsRes, eventsThisRes, eventsNextRes, usageRes] = await Promise.all([
           api.get('/churches/me'),
           api.get('/sermons').catch(() => ({ data: [] })),
           api.get('/feedback/stats').catch(() => ({ data: null })),
           api.get(`/calendar/events?year=${thisYear}&month=${thisMonth}`).catch(() => ({ data: { events: [] } })),
           api.get(`/calendar/events?year=${nextYear}&month=${nextMonth}`).catch(() => ({ data: { events: [] } })),
+          api.get('/billing/usage').catch(() => ({ data: null })),
         ]);
         setChurchData(churchRes.data);
         setRecentSermons(sermonsRes.data.slice(0, 5));
         setUsageStats(statsRes.data);
+        if (usageRes.data) setBillingUsage(usageRes.data);
 
         // 일정 필터: 오늘~30일 이내, 가까운 순 정렬
         const evThisData = eventsThisRes.data?.events || eventsThisRes.data || [];
@@ -180,9 +183,15 @@ export default function HomePage() {
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <HelpButton pageKey="home" steps={HELP_DATA.home} />
-            <span className="bg-[#C9A84C]/20 text-[#C9A84C] px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold border border-[#C9A84C]/30">
-              BETA
-            </span>
+            {billingUsage && (
+              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium border ${
+                billingUsage.plan === 'FREE' || billingUsage.plan === 'SEED'
+                  ? 'bg-[#C9A84C]/10 text-[#C9A84C] border-[#C9A84C]/20'
+                  : 'bg-green-900/30 text-green-300 border-green-500/20'
+              }`}>
+                {billingUsage.plan === 'FREE' ? '무료' : billingUsage.plan === 'SEED' ? '새싹' : billingUsage.plan === 'BASIC' ? '기본' : billingUsage.plan === 'PREMIUM' ? '프리미엄' : billingUsage.plan}
+              </span>
+            )}
             <button onClick={handleLogout} className="text-xs sm:text-sm text-[#5A6F8C] hover:text-white">
               로그아웃
             </button>
@@ -192,11 +201,41 @@ export default function HomePage() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
 
-        {/* 베타 테스트 안내 */}
-        <div className="bg-gradient-to-r from-[#0F1A2E] to-[#1B2D4A] rounded-2xl p-4 flex items-center gap-3">
-          <span className="bg-[#C9A84C] text-[#0F1A2E] text-[10px] font-bold px-2.5 py-0.5 rounded-full flex-shrink-0">BETA</span>
-          <p className="text-sm text-[#8B9DC3]">현재 모든 기능이 <span className="text-[#C9A84C] font-semibold">무료</span>로 제공되고 있습니다. 사용 후 피드백을 남겨주시면 제품 개선에 큰 도움이 됩니다.</p>
-        </div>
+        {/* 사용량 표시 */}
+        {billingUsage && (
+          <div className="bg-gradient-to-r from-[#0F1A2E] to-[#1B2D4A] rounded-2xl p-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 relative">
+                  <svg className="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none" stroke="#1B2D4A" strokeWidth="3"/>
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none" stroke={billingUsage.remainingSermons <= 1 ? '#EF4444' : '#C9A84C'} strokeWidth="3"
+                      strokeDasharray={`${billingUsage.maxSermons > 0 ? (billingUsage.usedSermons / billingUsage.maxSermons) * 100 : 0}, 100`}/>
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">{billingUsage.remainingSermons}</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-white font-medium">
+                  이번 달 설교 <span className="text-[#C9A84C]">{billingUsage.usedSermons}</span>/{billingUsage.maxSermons}편 사용
+                </p>
+                <p className="text-[10px] text-[#5A6F8C]">
+                  {billingUsage.remainingSermons <= 0 ? '한도에 도달했습니다' :
+                   billingUsage.remainingSermons <= 2 ? `남은 ${billingUsage.remainingSermons}편 — 곧 한도에 도달합니다` :
+                   `${billingUsage.remainingSermons}편 남음`}
+                </p>
+              </div>
+            </div>
+            {billingUsage.remainingSermons <= 2 && (
+              <button onClick={() => router.push('/billing')}
+                className="flex-shrink-0 bg-[#C9A84C] text-[#0F1A2E] px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-[#D4B85C]">
+                업그레이드
+              </button>
+            )}
+          </div>
+        )}
 
         {/* 절기/이벤트 알림 */}
         {upcomingEvents.length > 0 && (

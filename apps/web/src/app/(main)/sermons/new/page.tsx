@@ -106,7 +106,15 @@ function NewSermonPage() {
 
       router.push(`/sermons/${data.id}`);
     } catch (err: any) {
-      setError(err.response?.data?.message || '설교 생성에 실패했습니다. 다시 시도해주세요.');
+      const msg = err.response?.data?.message || '';
+      const status = err.response?.status;
+      if (status === 403 && (msg.includes('한도') || msg.includes('종료'))) {
+        setError('__LIMIT__');
+      } else if (status === 429) {
+        setError('요청이 너무 빈번합니다. 1분 후 다시 시도해주세요.');
+      } else {
+        setError(msg || '설교 생성에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      }
       setLoading(false);
     }
   };
@@ -348,11 +356,20 @@ function NewSermonPage() {
         )}
 
         {/* 에러 */}
-        {error && (
+        {error && error === '__LIMIT__' ? (
+          <div className="mt-4 p-5 bg-[#0F1A2E] rounded-2xl text-center">
+            <p className="text-[#C9A84C] font-bold mb-1">무료 사용 한도에 도달했습니다</p>
+            <p className="text-[#8B9DC3] text-sm mb-4">더 많은 설교를 생성하려면 플랜을 업그레이드하세요</p>
+            <button onClick={() => router.push('/billing')}
+              className="bg-gradient-to-r from-[#C9A84C] to-[#8B6914] text-white px-8 py-3 rounded-xl font-bold text-sm hover:opacity-90">
+              요금제 보기
+            </button>
+          </div>
+        ) : error ? (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error}
           </div>
-        )}
+        ) : null}
 
         {/* 하단 버튼 */}
         <div className="flex gap-3 mt-8">

@@ -111,4 +111,29 @@ export class BillingService {
 
     return { allowed: false, reason: '구독이 만료되었습니다. 결제를 진행해주세요.' };
   }
+
+  // 사용량 조회 (모든 유저 접근 가능)
+  async getUsage(userId: string) {
+    const membership = await this.prisma.membership.findFirst({
+      where: { userId, status: 'active' },
+      include: { church: { include: { subscription: true } } },
+    });
+    if (!membership) return null;
+
+    const sub = membership.church.subscription!;
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const usedThisMonth = await this.prisma.sermonRequest.count({
+      where: { churchId: membership.churchId, createdAt: { gte: monthStart } },
+    });
+
+    return {
+      plan: sub.plan,
+      status: sub.status,
+      maxSermons: sub.maxSermonsMonth,
+      usedSermons: usedThisMonth,
+      remainingSermons: Math.max(0, sub.maxSermonsMonth - usedThisMonth),
+    };
+  }
 }
