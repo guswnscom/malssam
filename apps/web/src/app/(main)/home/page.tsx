@@ -77,7 +77,10 @@ export default function HomePage() {
         if (!token) { router.push('/login'); return; }
 
         const meRes = await api.get('/auth/me');
-        if (!meRes.data.churchId) { router.push('/onboarding/church'); return; }
+        const me = meRes.data;
+        if (!me.churchId) { router.push('/onboarding/church'); return; }
+        // store에 유저 정보 동기화 (새로고침 시 복구)
+        useAuthStore.getState().setAuth({ id: me.id, name: me.name, email: me.email }, me.churchId, me.role);
 
         const now = new Date();
         const thisMonth = now.getMonth() + 1;
@@ -477,7 +480,7 @@ export default function HomePage() {
                 { href: '/billing', label: '요금제', desc: '구독 및 피드백',
                   icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>' },
               ] : []),
-              ...(useAuthStore.getState().user?.email === 'sioo0929@gmail.com' ? [
+              ...(user?.email === 'sioo0929@gmail.com' ? [
                 { href: '/admin', label: '관리자', desc: '대시보드',
                   icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>' },
               ] : []),
