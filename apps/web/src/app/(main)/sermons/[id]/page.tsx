@@ -208,18 +208,24 @@ ${sermon.conclusion}
     logUsage('ppt_download', { sermonId: sermon.id, worshipType: sermon.worshipType });
   };
 
-  const handlePdf = () => {
-    const t = localStorage.getItem('accessToken');
-    window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'}/sermons/${sermon.id}/pdf?token=${t}`, '_blank');
+  const handlePdf = async () => {
+    try {
+      const { data } = await api.get(`/sermons/${sermon.id}/pdf-token`);
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+      window.open(`${baseUrl}/sermons/${sermon.id}/pdf?sig=${data.sig}&exp=${data.exp}`, '_blank');
+    } catch { alert('PDF를 열 수 없습니다'); }
   };
 
   const handleExportPdf = async () => {
-    const t = localStorage.getItem('accessToken');
-    const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'}/sermons/${sermon.id}/pdf?token=${t}`;
-    const w = window.open(url, '_blank');
-    if (w) {
-      setTimeout(() => { try { w.print(); } catch {} }, 2000);
-    }
+    try {
+      const { data } = await api.get(`/sermons/${sermon.id}/pdf-token`);
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+      const url = `${baseUrl}/sermons/${sermon.id}/pdf?sig=${data.sig}&exp=${data.exp}`;
+      const w = window.open(url, '_blank');
+      if (w) {
+        setTimeout(() => { try { w.print(); } catch {} }, 2000);
+      }
+    } catch { alert('PDF를 열 수 없습니다'); }
     logUsage('pdf_view', { sermonId: sermon.id });
   };
 

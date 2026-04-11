@@ -35,12 +35,26 @@ export class AuthController {
     return this.authService.findEmail(name);
   }
 
+  @Post('request-reset')
+  requestPasswordReset(@Body('email') email: string) {
+    return this.authService.requestPasswordReset(email);
+  }
+
+  @Post('verify-reset')
+  verifyResetCode(
+    @Body('email') email: string,
+    @Body('code') code: string,
+  ) {
+    return this.authService.verifyResetCode(email, code);
+  }
+
   @Post('reset-password')
   resetPassword(
     @Body('email') email: string,
+    @Body('code') code: string,
     @Body('newPassword') newPassword: string,
   ) {
-    return this.authService.resetPassword(email, newPassword);
+    return this.authService.resetPassword(email, code, newPassword);
   }
 
   @UseGuards(JwtAuthGuard)

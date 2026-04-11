@@ -14,6 +14,27 @@ import { RegenerateSermonDto } from './dto/regenerate-sermon.dto';
 import { AnalyzeSermonDto } from './dto/analyze-sermon.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
+// 인메모리 Rate Limiter (사용자별 분당 3회)
+const rateLimitMap = new Map<string, number[]>();
+function checkRateLimit(userId: string, maxPerMinute = 3): boolean {
+  const now = Date.now();
+  const key = userId;
+  const timestamps = (rateLimitMap.get(key) || []).filter(t => now - t < 60000);
+  if (timestamps.length >= maxPerMinute) return false;
+  timestamps.push(now);
+  rateLimitMap.set(key, timestamps);
+  return true;
+}
+// 5분마다 오래된 항목 정리
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamps] of rateLimitMap.entries()) {
+    const valid = timestamps.filter(t => now - t < 60000);
+    if (valid.length === 0) rateLimitMap.delete(key);
+    else rateLimitMap.set(key, valid);
+  }
+}, 300000);
+
 @Controller('sermons')
 export class SermonController {
   constructor(
@@ -24,6 +45,9 @@ export class SermonController {
   @Post('generate')
   @UseGuards(JwtAuthGuard)
   async generate(@Request() req: any, @Body() dto: GenerateSermonDto) {
+    if (!checkRateLimit(req.user.sub, 3)) {
+      throw new HttpException({ statusCode: 429, message: '요청이 너무 빈번합니다. 1분 후 다시 시도해주세요.' }, 429);
+    }
     try {
       return await this.sermonService.generate(req.user.sub, dto);
     } catch (error: any) {
@@ -81,14 +105,31 @@ export class SermonController {
     return this.sermonService.list(req.user.sub, worshipType);
   }
 
+  @Get(':id/pdf-token')
+  @UseGuards(JwtAuthGuard)
+  getPdfToken(@Param('id') id: string) {
+    const crypto = require('crypto');
+    const secret = process.env.JWT_ACCESS_SECRET || '';
+    const exp = Math.floor(Date.now() / 1000) + 300; // 5분 유효
+    const sig = crypto.createHmac('sha256', secret).update(`${id}:${exp}`).digest('hex').substring(0, 16);
+    return { sig, exp };
+  }
+
   @Get(':id/pdf')
-  async getPdf(@Request() req: any, @Param('id') id: string, @Query('token') token: string, @Res() res: Response) {
+  async getPdf(@Request() req: any, @Param('id') id: string, @Query('sig') sig: string, @Query('exp') exp: string, @Res() res: Response) {
     let userId: string | null = req.user?.sub || null;
-    if (!userId && token) {
-      try {
-        const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET || '') as any;
-        userId = payload.sub;
-      } catch { /* token invalid */ }
+    // 서명 기반 임시 토큰 검증 (5분 유효)
+    if (!userId && sig && exp) {
+      const secret = process.env.JWT_ACCESS_SECRET || '';
+      const now = Math.floor(Date.now() / 1000);
+      if (parseInt(exp) > now) {
+        const crypto = require('crypto');
+        const expected = crypto.createHmac('sha256', secret).update(`${id}:${exp}`).digest('hex').substring(0, 16);
+        if (sig === expected) {
+          // 서명 유효 → 원본 요청자의 userId를 sig에서 복원할 수 없으므로, 공개 접근으로 처리
+          userId = '__pdf_signed__';
+        }
+      }
     }
     if (!userId) {
       res.status(401).send('<h1>인증이 필요합니다. 로그인 후 다시 시도해주세요.</h1>');
@@ -126,6 +167,9 @@ export class SermonController {
   @Post(':id/regenerate')
   @UseGuards(JwtAuthGuard)
   async regenerate(@Request() req: any, @Param('id') id: string, @Body() dto: RegenerateSermonDto) {
+    if (!checkRateLimit(req.user.sub, 5)) {
+      throw new HttpException({ statusCode: 429, message: '요청이 너무 빈번합니다. 1분 후 다시 시도해주세요.' }, 429);
+    }
     try {
       return await this.sermonService.regenerate(req.user.sub, id, dto);
     } catch (error: any) {

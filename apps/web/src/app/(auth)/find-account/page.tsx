@@ -15,8 +15,10 @@ export default function FindAccountPage() {
   const [emailError, setEmailError] = useState('');
   const [emailLoading, setEmailLoading] = useState(false);
 
-  // 비밀번호 재설정
+  // 비밀번호 재설정 (3단계)
+  const [resetStep, setResetStep] = useState(1); // 1: 이메일, 2: 코드, 3: 새 비밀번호
   const [resetEmail, setResetEmail] = useState('');
+  const [resetCode, setResetCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pwError, setPwError] = useState('');
@@ -34,14 +36,41 @@ export default function FindAccountPage() {
     } finally { setEmailLoading(false); }
   };
 
+  // 1단계: 인증 코드 요청
+  const handleRequestCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwError(''); setPwLoading(true);
+    try {
+      const { data } = await api.post('/auth/request-reset', { email: resetEmail.trim() });
+      // 베타: 코드가 응답에 포함됨 (이메일 발송 전까지)
+      if (data.code) setResetCode(data.code);
+      setResetStep(2);
+    } catch (err: any) {
+      setPwError(err.response?.data?.message || '요청에 실패했습니다');
+    } finally { setPwLoading(false); }
+  };
+
+  // 2단계: 코드 검증
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwError(''); setPwLoading(true);
+    try {
+      await api.post('/auth/verify-reset', { email: resetEmail.trim(), code: resetCode.trim() });
+      setResetStep(3);
+    } catch (err: any) {
+      setPwError(err.response?.data?.message || '인증 코드가 올바르지 않습니다');
+    } finally { setPwLoading(false); }
+  };
+
+  // 3단계: 비밀번호 변경
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setPwError(''); setPwSuccess(false);
+    setPwError('');
     if (newPassword.length < 8) { setPwError('비밀번호는 8자 이상이어야 합니다'); return; }
     if (newPassword !== confirmPassword) { setPwError('비밀번호가 일치하지 않습니다'); return; }
     setPwLoading(true);
     try {
-      await api.post('/auth/reset-password', { email: resetEmail.trim(), newPassword });
+      await api.post('/auth/reset-password', { email: resetEmail.trim(), code: resetCode.trim(), newPassword });
       setPwSuccess(true);
     } catch (err: any) {
       setPwError(err.response?.data?.message || '비밀번호 변경에 실패했습니다');
@@ -146,8 +175,8 @@ export default function FindAccountPage() {
                     로그인하기
                   </Link>
                 </div>
-              ) : (
-                <form onSubmit={handleResetPassword} className="space-y-5">
+              ) : resetStep === 1 ? (
+                <form onSubmit={handleRequestCode} className="space-y-5">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">가입한 이메일</label>
                     <input type="email" required
@@ -155,11 +184,37 @@ export default function FindAccountPage() {
                       placeholder="가입한 이메일을 정확히 입력하세요"
                       value={resetEmail} onChange={e => setResetEmail(e.target.value)} />
                   </div>
+                  {pwError && <p className="text-red-500 text-sm">{pwError}</p>}
+                  <button type="submit" disabled={pwLoading}
+                    className="w-full bg-[#0F1A2E] text-white py-3.5 rounded-xl font-semibold hover:bg-[#1B2D4A] disabled:bg-gray-300 transition-colors text-sm">
+                    {pwLoading ? '발송 중...' : '인증 코드 받기'}
+                  </button>
+                </form>
+              ) : resetStep === 2 ? (
+                <form onSubmit={handleVerifyCode} className="space-y-5">
+                  <p className="text-sm text-gray-500 bg-gray-50 rounded-xl p-3">{resetEmail}로 발송된 6자리 코드를 입력하세요 (10분 유효)</p>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">인증 코드</label>
+                    <input type="text" required maxLength={6} pattern="[0-9]{6}"
+                      className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-[#C9A84C]/30 focus:border-[#C9A84C] outline-none text-sm text-center text-2xl tracking-[0.5em] font-mono"
+                      placeholder="000000"
+                      value={resetCode} onChange={e => setResetCode(e.target.value.replace(/\D/g, '').slice(0, 6))} />
+                  </div>
+                  {pwError && <p className="text-red-500 text-sm">{pwError}</p>}
+                  <button type="submit" disabled={pwLoading || resetCode.length !== 6}
+                    className="w-full bg-[#0F1A2E] text-white py-3.5 rounded-xl font-semibold hover:bg-[#1B2D4A] disabled:bg-gray-300 transition-colors text-sm">
+                    {pwLoading ? '확인 중...' : '코드 확인'}
+                  </button>
+                  <button type="button" onClick={() => { setResetStep(1); setPwError(''); }} className="w-full text-center text-xs text-gray-400 hover:text-gray-600">이메일 다시 입력</button>
+                </form>
+              ) : (
+                <form onSubmit={handleResetPassword} className="space-y-5">
+                  <p className="text-sm text-green-600 bg-green-50 rounded-xl p-3">인증 완료! 새 비밀번호를 입력하세요.</p>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">새 비밀번호</label>
                     <input type="password" required minLength={8}
                       className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-[#C9A84C]/30 focus:border-[#C9A84C] outline-none text-sm"
-                      placeholder="8자 이상, 영문+숫자"
+                      placeholder="8자 이상"
                       value={newPassword} onChange={e => setNewPassword(e.target.value)} />
                   </div>
                   <div>

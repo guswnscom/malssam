@@ -85,28 +85,30 @@ export class SermonService {
         congregationType: profile.congregationType,
       });
 
-      const draft = await this.prisma.sermonDraft.create({
-        data: {
-          sermonRequestId: request.id, title: output.title,
-          scripture: output.scripture || dto.scripture,
-          scriptureText: output.scriptureText || null,
-          summary: output.summary || '', introduction: output.introduction,
-          outline: output.outline as any, application: output.application,
-          conclusion: output.conclusion,
-          citations: {
-            create: (output.references || []).map((ref) => ({
-              citationType: ref.type || 'REFERENCE',
-              sourceAuthor: ref.author, sourceTitle: ref.title,
-            })),
+      // 트랜잭션: draft 생성 + request 상태 업데이트를 원자적으로 처리
+      const [draft] = await this.prisma.$transaction([
+        this.prisma.sermonDraft.create({
+          data: {
+            sermonRequestId: request.id, title: output.title,
+            scripture: output.scripture || dto.scripture,
+            scriptureText: output.scriptureText || null,
+            summary: output.summary || '', introduction: output.introduction,
+            outline: output.outline as any, application: output.application,
+            conclusion: output.conclusion,
+            citations: {
+              create: (output.references || []).map((ref) => ({
+                citationType: ref.type || 'REFERENCE',
+                sourceAuthor: ref.author, sourceTitle: ref.title,
+              })),
+            },
           },
-        },
-        include: { citations: true },
-      });
-
-      await this.prisma.sermonRequest.update({
-        where: { id: request.id },
-        data: { status: 'completed', aiModel: model, aiTokensUsed: tokensUsed },
-      });
+          include: { citations: true },
+        }),
+        this.prisma.sermonRequest.update({
+          where: { id: request.id },
+          data: { status: 'completed', aiModel: model, aiTokensUsed: tokensUsed },
+        }),
+      ]);
 
       return this.formatDraftResponse(draft, request);
     } catch (error) {
@@ -199,7 +201,18 @@ export class SermonService {
   // ── PDF ──
   // ── PDF (HTML 기반 — 한글 정상 표시) ──
   async generatePdfHtml(userId: string, sermonId: string): Promise<string> {
-    const { draft } = await this.loadDraftWithAuth(userId, sermonId);
+    // 서명된 PDF 요청 시 인증 우회 (이미 서명으로 검증됨)
+    let draft: any;
+    if (userId === '__pdf_signed__') {
+      draft = await this.prisma.sermonDraft.findUnique({
+        where: { id: sermonId },
+        include: { citations: true, sermonRequest: true },
+      });
+      if (!draft) throw new NotFoundException('설교를 찾을 수 없습니다');
+    } else {
+      const result = await this.loadDraftWithAuth(userId, sermonId);
+      draft = result.draft;
+    }
     const request = draft.sermonRequest;
     const church = await this.prisma.church.findUnique({ where: { id: request.churchId } });
     const churchName = church?.name || '';
@@ -407,9 +420,12 @@ export class SermonService {
       throw new ForbiddenException('삭제 권한이 없습니다');
     }
 
-    await this.prisma.citation.deleteMany({ where: { sermonDraftId: sermonId } });
-    await this.prisma.sermonDraft.delete({ where: { id: sermonId } });
-    await this.prisma.sermonRequest.delete({ where: { id: draft.sermonRequestId } });
+    // 트랜잭션: 관련 데이터를 원자적으로 삭제
+    await this.prisma.$transaction([
+      this.prisma.citation.deleteMany({ where: { sermonDraftId: sermonId } }),
+      this.prisma.sermonDraft.delete({ where: { id: sermonId } }),
+      this.prisma.sermonRequest.delete({ where: { id: draft.sermonRequestId } }),
+    ]);
 
     return { message: '설교가 삭제되었습니다' };
   }

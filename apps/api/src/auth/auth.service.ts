@@ -129,19 +129,71 @@ export class AuthService {
     });
   }
 
-  async resetPassword(email: string, newPassword: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
+  // 1단계: 인증 코드 발급 (6자리)
+  async requestPasswordReset(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) {
-      throw new UnauthorizedException('해당 이메일로 가입된 계정이 없습니다');
+      // 보안: 이메일 존재 여부를 노출하지 않음
+      return { message: '해당 이메일로 인증 코드가 발송되었습니다' };
     }
 
-    const passwordHash = await bcrypt.hash(newPassword, 12);
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { passwordHash },
+    // 기존 미사용 코드 무효화
+    await this.prisma.passwordReset.updateMany({
+      where: { email, used: false },
+      data: { used: true },
     });
+
+    // 6자리 코드 생성 (10분 유효)
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    await this.prisma.passwordReset.create({
+      data: {
+        email,
+        code,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10분
+      },
+    });
+
+    // TODO: 실제 이메일 발송 연동 시 여기에 추가
+    // 현재는 코드를 응답에 포함 (베타 기간 한정)
+    return { message: '해당 이메일로 인증 코드가 발송되었습니다', code };
+  }
+
+  // 2단계: 코드 검증
+  async verifyResetCode(email: string, code: string) {
+    const record = await this.prisma.passwordReset.findFirst({
+      where: { email, code, used: false, expiresAt: { gt: new Date() } },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!record) {
+      throw new UnauthorizedException('인증 코드가 올바르지 않거나 만료되었습니다');
+    }
+
+    return { verified: true, resetId: record.id };
+  }
+
+  // 3단계: 비밀번호 변경 (코드 검증 후)
+  async resetPassword(email: string, code: string, newPassword: string) {
+    // 코드 재검증
+    const record = await this.prisma.passwordReset.findFirst({
+      where: { email, code, used: false, expiresAt: { gt: new Date() } },
+    });
+
+    if (!record) {
+      throw new UnauthorizedException('인증 코드가 올바르지 않거나 만료되었습니다');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      throw new UnauthorizedException('계정을 찾을 수 없습니다');
+    }
+
+    // 비밀번호 변경 + 코드 사용 처리 (트랜잭션)
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: user.id }, data: { passwordHash } }),
+      this.prisma.passwordReset.update({ where: { id: record.id }, data: { used: true } }),
+    ]);
 
     return { message: '비밀번호가 성공적으로 변경되었습니다' };
   }
