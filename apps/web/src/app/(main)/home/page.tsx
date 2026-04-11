@@ -172,14 +172,17 @@ export default function HomePage() {
 
         {/* 절기/이벤트 알림 */}
         {upcomingEvents.length > 0 && (
-          <div className="relative overflow-hidden rounded-2xl" style={{ background: '#5C3D2E' }}>
-            {/* Gemini 생성 배경 이미지 — 우측 정렬 */}
+          <div className="relative overflow-hidden rounded-2xl" style={{ background: '#4A3525' }}>
+            {/* 배경 이미지 — 중앙 정렬, 전체 커버 */}
             <div className="absolute inset-0">
-              <Image src="/images/calendar-banner.png" alt="교회 일정" fill className="object-cover object-right" priority sizes="(max-width: 768px) 100vw, 800px" />
+              <Image src="/images/calendar-banner.png" alt="교회 일정" fill className="object-cover object-center scale-110" priority sizes="(max-width: 768px) 100vw, 800px" />
             </div>
-            {/* 좌측 나무 톤 오버레이 — 모바일에서 더 넓게 */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#4A3020] via-[#4A3020]/80 sm:via-[#4A3020]/50 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#3B2510]/30 via-transparent to-[#3B2510]/30" />
+            {/* 전체를 감싸는 나무색 오버레이 — 이미지 경계를 숨김 */}
+            <div className="absolute inset-0 bg-[#4A3525]/40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#4A3525]/90 via-[#4A3525]/50 to-[#4A3525]/70" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#3B2510]/20 via-transparent to-[#3B2510]/30" />
+            {/* 모서리 비네팅 */}
+            <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 40px rgba(58,37,21,0.5)' }} />
             {/* 콘텐츠 */}
             <div className="relative p-6 sm:p-7 z-10 flex flex-col justify-center min-h-[160px] sm:min-h-[170px]">
               <h3 className="text-xl sm:text-2xl font-bold text-[#E8D5A8] mb-3 sm:mb-4" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
