@@ -172,13 +172,36 @@ export default function HomePage() {
         {/* 절기/이벤트 알림 */}
         {upcomingEvents.length > 0 && (
           <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/20 min-h-[140px]">
-            {/* 배경 그라데이션 */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF3D6] to-[#F5E6C8]" />
-            {/* 우측 십자가+성경 이미지 */}
-            <div className="absolute right-0 top-0 bottom-0 w-1/2 sm:w-2/5">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] via-[#FFF8E7]/80 to-[#FFF8E7]/10 z-10" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#FFF8E7]/40 to-transparent z-10" />
-              <img src="https://images.unsplash.com/photo-1507692049790-de58290a4334?w=800&q=90&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            {/* 배경 — 따뜻한 골드 그라데이션 */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#FFF8E7] via-[#FFF3D6] to-[#EDE0C0]" />
+            {/* 우측 — 십자가+빛 SVG 일러스트 */}
+            <div className="absolute right-0 top-0 bottom-0 w-2/5 sm:w-1/3">
+              {/* 왼쪽 페이드 */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#FFF8E7] to-transparent z-10" />
+              {/* 빛 방사 효과 */}
+              <div className="absolute inset-0 z-0" style={{ background: 'radial-gradient(circle at 60% 50%, rgba(201,168,76,0.25) 0%, rgba(201,168,76,0.08) 40%, transparent 70%)' }} />
+              {/* 십자가 + 펼쳐진 성경 SVG */}
+              <svg className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-[5] opacity-60" width="90" height="100" viewBox="0 0 90 100" fill="none">
+                {/* 펼쳐진 성경책 */}
+                <ellipse cx="45" cy="78" rx="38" ry="6" fill="#C9A84C" opacity="0.15"/>
+                <path d="M10 72 Q25 62 45 68 Q65 62 80 72 L80 82 Q65 74 45 80 Q25 74 10 82 Z" fill="#D4B85C" opacity="0.35"/>
+                <path d="M10 72 Q25 62 45 68 L45 80 Q25 74 10 82 Z" fill="#C9A84C" opacity="0.25"/>
+                <path d="M80 72 Q65 62 45 68 L45 80 Q65 74 80 82 Z" fill="#B8944A" opacity="0.25"/>
+                {/* 성경 가운데 선 */}
+                <line x1="45" y1="66" x2="45" y2="80" stroke="#C9A84C" strokeWidth="0.5" opacity="0.4"/>
+                {/* 십자가 */}
+                <rect x="40" y="10" width="10" height="55" rx="2" fill="#C9A84C" opacity="0.4"/>
+                <rect x="27" y="22" width="36" height="10" rx="2" fill="#C9A84C" opacity="0.4"/>
+                {/* 십자가 하이라이트 */}
+                <rect x="43" y="14" width="4" height="47" rx="1" fill="#C9A84C" opacity="0.2"/>
+                <rect x="31" y="25" width="28" height="4" rx="1" fill="#C9A84C" opacity="0.2"/>
+                {/* 빛 광선 */}
+                <line x1="45" y1="8" x2="45" y2="0" stroke="#C9A84C" strokeWidth="1" opacity="0.2"/>
+                <line x1="45" y1="12" x2="30" y2="2" stroke="#C9A84C" strokeWidth="0.7" opacity="0.15"/>
+                <line x1="45" y1="12" x2="60" y2="2" stroke="#C9A84C" strokeWidth="0.7" opacity="0.15"/>
+                <line x1="25" y1="27" x2="14" y2="20" stroke="#C9A84C" strokeWidth="0.7" opacity="0.12"/>
+                <line x1="65" y1="27" x2="76" y2="20" stroke="#C9A84C" strokeWidth="0.7" opacity="0.12"/>
+              </svg>
             </div>
             <div className="relative p-5 sm:p-6 z-20">
             <h3 className="text-sm font-semibold text-[#8B6914] mb-3 flex items-center gap-2">
