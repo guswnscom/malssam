@@ -10,7 +10,7 @@ export class CalendarService {
     if (!membership) throw new NotFoundException('소속된 교회가 없습니다');
 
     const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0); // 해당 월 마지막 날
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999); // 해당 월 마지막 날 끝까지
 
     const events = await this.prisma.churchEvent.findMany({
       where: {

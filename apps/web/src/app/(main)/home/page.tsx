@@ -94,21 +94,17 @@ export default function HomePage() {
         setRecentSermons(sermonsRes.data.slice(0, 5));
         setUsageStats(statsRes.data);
 
-        // 일정 필터: 알림 날짜가 되었거나 7일 이내인 일정 표시
-        const allEvents = [...(eventsThisRes.data.events || []), ...(eventsNextRes.data.events || [])];
-        const today = new Date(); today.setHours(0, 0, 0, 0);
+        // 일정 필터: 오늘~30일 이내, 가까운 순 정렬
+        const evThisData = eventsThisRes.data?.events || eventsThisRes.data || [];
+        const evNextData = eventsNextRes.data?.events || eventsNextRes.data || [];
+        const allEvents = [...(Array.isArray(evThisData) ? evThisData : []), ...(Array.isArray(evNextData) ? evNextData : [])];
+        const todayDate = new Date(); todayDate.setHours(0, 0, 0, 0);
         const upcoming = allEvents
           .filter((e: any) => {
             if (e.isLiturgical) return false;
             const eventDate = new Date(e.date);
-            if (eventDate < today) return false; // 지난 일정 제외
-            const daysUntil = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-            // 알림 날짜가 설정되어 있으면 해당 날짜에 도달했을 때만 표시
-            if (e.reminderDays && e.reminderDays.length > 0) {
-              return e.reminderDays.some((rd: number) => daysUntil <= rd);
-            }
-            // 알림 미설정이면 7일 이내 표시
-            return daysUntil <= 7;
+            eventDate.setHours(0, 0, 0, 0);
+            return eventDate >= todayDate;
           })
           .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
           .slice(0, 5);
