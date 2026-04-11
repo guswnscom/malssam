@@ -171,15 +171,46 @@ export default function HomePage() {
 
         {/* 절기/이벤트 알림 */}
         {upcomingEvents.length > 0 && (
-          <div className="relative overflow-hidden rounded-2xl min-h-[160px] sm:min-h-[180px]">
-            {/* 전체 배경 이미지 */}
-            <img src="/images/cross-bible.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
-            {/* 어두운 오버레이 — 왼쪽 진하게, 오른쪽 투명 */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#3B2510]/90 via-[#3B2510]/70 to-[#3B2510]/30" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#3B2510]/40 to-transparent" />
-            {/* 콘텐츠 */}
-            <div className="relative p-5 sm:p-7 z-10 flex flex-col justify-center h-full">
-              <h3 className="text-xl sm:text-2xl font-bold text-[#E8D5A8] mb-3 sm:mb-4 tracking-wide" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+          <div className="relative overflow-hidden rounded-2xl min-h-[170px] sm:min-h-[190px]" style={{ background: 'linear-gradient(135deg, #5C3D2E 0%, #4A3020 30%, #3B2510 60%, #2E1C0C 100%)' }}>
+            {/* 나무 텍스처 노이즈 */}
+            <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px)' }} />
+            {/* 우측 따뜻한 빛 */}
+            <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 50% 80% at 80% 50%, rgba(201,168,76,0.15) 0%, transparent 70%)' }} />
+            {/* 우측 — 십자가+성경 SVG */}
+            <div className="absolute right-2 sm:right-8 top-1/2 -translate-y-1/2 z-[2]">
+              <svg width="130" height="140" viewBox="0 0 130 140" fill="none" className="sm:w-[160px] sm:h-[170px]">
+                {/* 펼쳐진 성경책 — 입체감 */}
+                <path d="M20 95 Q45 82 65 90 Q85 82 110 95 L110 108 Q85 98 65 105 Q45 98 20 108 Z" fill="#F5E6D0" opacity="0.9"/>
+                <path d="M20 95 Q45 82 65 90 L65 105 Q45 98 20 108 Z" fill="#EDE0CC" opacity="0.85"/>
+                <path d="M110 95 Q85 82 65 90 L65 105 Q85 98 110 108 Z" fill="#E8D9C0" opacity="0.85"/>
+                {/* 성경 페이지 라인들 */}
+                <line x1="30" y1="96" x2="58" y2="93" stroke="#C4B49A" strokeWidth="0.4" opacity="0.5"/>
+                <line x1="32" y1="99" x2="57" y2="95" stroke="#C4B49A" strokeWidth="0.4" opacity="0.4"/>
+                <line x1="34" y1="102" x2="56" y2="97" stroke="#C4B49A" strokeWidth="0.4" opacity="0.3"/>
+                <line x1="72" y1="93" x2="100" y2="96" stroke="#C4B49A" strokeWidth="0.4" opacity="0.5"/>
+                <line x1="73" y1="95" x2="98" y2="99" stroke="#C4B49A" strokeWidth="0.4" opacity="0.4"/>
+                <line x1="74" y1="97" x2="96" y2="102" stroke="#C4B49A" strokeWidth="0.4" opacity="0.3"/>
+                {/* 성경 가운데 */}
+                <line x1="65" y1="88" x2="65" y2="106" stroke="#B8A88E" strokeWidth="0.8" opacity="0.6"/>
+                {/* 성경 그림자 */}
+                <ellipse cx="65" cy="110" rx="45" ry="4" fill="#1A0E05" opacity="0.2"/>
+                {/* 나무 십자가 — 입체 */}
+                <rect x="57" y="12" width="16" height="72" rx="2" fill="#8B5E3C"/>
+                <rect x="38" y="28" width="54" height="14" rx="2" fill="#8B5E3C"/>
+                {/* 십자가 하이라이트 (나무 결) */}
+                <rect x="60" y="15" width="5" height="66" rx="1" fill="#A07050" opacity="0.6"/>
+                <rect x="41" y="31" width="48" height="4" rx="1" fill="#A07050" opacity="0.5"/>
+                {/* 십자가 어두운 면 */}
+                <rect x="69" y="14" width="2" height="68" rx="0.5" fill="#6B4528" opacity="0.4"/>
+                <rect x="40" y="39" width="50" height="2" rx="0.5" fill="#6B4528" opacity="0.3"/>
+                {/* 십자가 위 빛 */}
+                <circle cx="65" cy="20" r="25" fill="#C9A84C" opacity="0.06"/>
+                <circle cx="65" cy="25" r="15" fill="#FFE4A0" opacity="0.04"/>
+              </svg>
+            </div>
+            {/* 좌측 콘텐츠 */}
+            <div className="relative p-5 sm:p-7 z-10 max-w-[65%] sm:max-w-[60%] flex flex-col justify-center h-full">
+              <h3 className="text-xl sm:text-2xl font-bold text-[#E8D5A8] mb-3 sm:mb-4" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
                 다가오는 교회 일정
               </h3>
               <div className="flex flex-wrap gap-2 mb-3">
@@ -199,7 +230,7 @@ export default function HomePage() {
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-[#E8D5A8]/60">클릭하시면 해당 절기에 맞는 설교를 바로 준비할 수 있습니다</p>
+              <p className="text-xs text-[#E8D5A8]/50">클릭하시면 해당 절기에 맞는 설교를 바로 준비할 수 있습니다</p>
             </div>
           </div>
         )}
