@@ -22,7 +22,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#FAFAF8' }}>
+        <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#F5F0E3' }}>
           <div className="text-center max-w-sm">
             <div className="w-16 h-16 bg-[#0F1A2E] rounded-2xl flex items-center justify-center mx-auto mb-5">
               <svg className="w-8 h-8 text-[#C9A84C]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
@@ -37,12 +37,12 @@ export default class ErrorBoundary extends Component<Props, State> {
             <div className="flex gap-3 justify-center">
               <button
                 onClick={() => this.setState({ hasError: false, error: null })}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#0F1A2E] text-[#C9A84C] hover:bg-[#1B2D4A]">
+                className="btn-primary px-6 py-2.5 text-sm">
                 다시 시도
               </button>
               <button
                 onClick={() => { window.location.href = '/home'; }}
-                className="px-5 py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">
+                className="btn-secondary px-6 py-2.5 text-sm">
                 홈으로 이동
               </button>
             </div>
