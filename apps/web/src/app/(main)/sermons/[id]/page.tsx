@@ -203,7 +203,7 @@ ${5 + sermon.outline.length}. 마무리: 핵심 한 줄 + 기도 요청
 ★ ${sermon.worshipType === 'DAWN' ? '새벽예배는 짧고 강렬하게, 하루를 여는 메시지 중심으로' : '금요예배는 한 주를 정리하는 위로와 소망 중심으로'} 구성하세요.`;
     }
 
-    const prompt = `아래 설교 내용을 기반으로 ${WL[sermon.worshipType] || sermon.worshipType}용 PPT 슬라이드를 만들어주세요.
+    const prompt = `함께 업로드한 설교문 PDF를 기반으로 ${WL[sermon.worshipType] || sermon.worshipType}용 PPT 슬라이드를 만들어주세요.
 
 [설교 정보]
 - 제목: ${sermon.title}
@@ -214,19 +214,6 @@ ${5 + sermon.outline.length}. 마무리: 핵심 한 줄 + 기도 요청
 [슬라이드 구성 — ${config.desc}]
 ${slideStructure}
 
-[설교 본문]
-
-[서론]
-${sermon.introduction}
-
-${sermon.outline.map(p => `[대지 ${p.point}: ${p.title}]\n${p.content}`).join('\n\n')}
-
-[적용]
-${sermon.application}
-
-[결론]
-${sermon.conclusion}
-
 [디자인 요청]
 - 깔끔하고 차분한 기독교 느낌의 디자인
 - 각 슬라이드에 주제에 맞는 배경 이미지 포함
@@ -234,7 +221,11 @@ ${sermon.conclusion}
 - 핵심 키워드는 크고 굵게, 보조 설명은 작게 배치
 - 배경은 밝고 따뜻한 톤 (어둡지 않게)
 - 성경 본문 인용 시 구절 번호 함께 표기
-- 청중이 설교 내용을 시각적으로 따라갈 수 있도록 구성`;
+- 청중이 설교 내용을 시각적으로 따라갈 수 있도록 구성
+
+[사용 방법]
+1. 이 설교의 PDF를 다운로드하여 함께 업로드해주세요
+2. 위 가이드와 함께 PDF를 소스로 사용하면 더 풍성한 PPT가 만들어집니다`;
 
     const blob = new Blob([prompt], { type: 'text/plain;charset=utf-8' });
     const a = document.createElement('a');
