@@ -90,6 +90,72 @@ function NewSermonPage() {
     return true;
   };
 
+  // 폴링: 생성 완료까지 3초 간격으로 상태 확인
+  const pollGenerationStatus = async (requestId: string) => {
+    const startTime = parseInt(localStorage.getItem('generatingStartedAt') || `${Date.now()}`);
+    const maxWait = 5 * 60 * 1000; // 최대 5분 대기
+
+    const poll = async (): Promise<void> => {
+      try {
+        const { data } = await api.get(`/sermons/generate/status/${requestId}`);
+        if (data.status === 'completed' && data.sermonId) {
+          localStorage.removeItem('generatingRequestId');
+          localStorage.removeItem('generatingStartedAt');
+          router.push(`/sermons/${data.sermonId}`);
+          return;
+        }
+        if (data.status === 'failed') {
+          localStorage.removeItem('generatingRequestId');
+          localStorage.removeItem('generatingStartedAt');
+          setError('설교 생성에 실패했습니다. 다시 시도해주세요.');
+          setLoading(false);
+          return;
+        }
+        // 너무 오래 걸리면 중단
+        if (Date.now() - startTime > maxWait) {
+          localStorage.removeItem('generatingRequestId');
+          localStorage.removeItem('generatingStartedAt');
+          setError('생성에 시간이 너무 오래 걸리고 있습니다. 잠시 후 설교 목록에서 확인해주세요.');
+          setLoading(false);
+          return;
+        }
+        // 계속 폴링
+        setTimeout(poll, 3000);
+      } catch (err: any) {
+        // 일시적 네트워크 오류는 계속 시도
+        if (Date.now() - startTime > maxWait) {
+          localStorage.removeItem('generatingRequestId');
+          localStorage.removeItem('generatingStartedAt');
+          setError('네트워크 오류로 상태를 확인할 수 없습니다.');
+          setLoading(false);
+          return;
+        }
+        setTimeout(poll, 5000);
+      }
+    };
+
+    poll();
+  };
+
+  // 페이지 마운트 시 진행 중인 생성이 있는지 확인 (앱 전환 후 복귀 대응)
+  useEffect(() => {
+    const requestId = localStorage.getItem('generatingRequestId');
+    if (requestId) {
+      setLoading(true);
+      pollGenerationStatus(requestId);
+    }
+    // 페이지 가시성 변경 시 폴링 재개 (모바일 백그라운드 복귀)
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const id = localStorage.getItem('generatingRequestId');
+        if (id) pollGenerationStatus(id);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleGenerate = async () => {
     setError('');
     setLoading(true);
@@ -104,7 +170,15 @@ function NewSermonPage() {
         specialInstruction: form.specialInstruction || undefined,
       });
 
-      router.push(`/sermons/${data.id}`);
+      // 새 비동기 응답: { requestId, status: 'generating' }
+      if (data.requestId) {
+        localStorage.setItem('generatingRequestId', data.requestId);
+        localStorage.setItem('generatingStartedAt', `${Date.now()}`);
+        pollGenerationStatus(data.requestId);
+      } else if (data.id) {
+        // 구버전 호환 (즉시 sermon 반환)
+        router.push(`/sermons/${data.id}`);
+      }
     } catch (err: any) {
       const msg = err.response?.data?.message || '';
       const status = err.response?.status;

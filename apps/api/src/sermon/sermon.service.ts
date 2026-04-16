@@ -80,6 +80,17 @@ export class SermonService {
       },
     });
 
+    // 백그라운드로 AI 생성 처리 (즉시 응답하여 모바일 앱 전환 시에도 안전)
+    this.processGenerationInBackground(request.id, dto, church, profile).catch(err => {
+      this.logger.error(`백그라운드 생성 실패: ${err.message}`);
+    });
+
+    // 즉시 requestId 반환 → 프론트가 폴링으로 상태 확인
+    return { requestId: request.id, status: 'generating' };
+  }
+
+  // 백그라운드 AI 생성 처리
+  private async processGenerationInBackground(requestId: string, dto: GenerateSermonDto, church: any, profile: any) {
     try {
       const { output, model, tokensUsed } = await this.ai.generateSermon({
         worshipType: dto.worshipType, targetDate: dto.targetDate,
@@ -91,11 +102,10 @@ export class SermonService {
         congregationType: profile.congregationType,
       });
 
-      // 트랜잭션: draft 생성 + request 상태 업데이트를 원자적으로 처리
-      const [draft] = await this.prisma.$transaction([
+      await this.prisma.$transaction([
         this.prisma.sermonDraft.create({
           data: {
-            sermonRequestId: request.id, title: output.title,
+            sermonRequestId: requestId, title: output.title,
             scripture: output.scripture || dto.scripture,
             scriptureText: output.scriptureText || null,
             summary: output.summary || '', introduction: output.introduction,
@@ -108,19 +118,41 @@ export class SermonService {
               })),
             },
           },
-          include: { citations: true },
         }),
         this.prisma.sermonRequest.update({
-          where: { id: request.id },
+          where: { id: requestId },
           data: { status: 'completed', aiModel: model, aiTokensUsed: tokensUsed },
         }),
       ]);
-
-      return this.formatDraftResponse(draft, request);
-    } catch (error) {
-      await this.prisma.sermonRequest.update({ where: { id: request.id }, data: { status: 'failed' } });
-      throw error;
+    } catch (error: any) {
+      this.logger.error(`AI 생성 실패 (requestId: ${requestId}): ${error.message}`);
+      await this.prisma.sermonRequest.update({
+        where: { id: requestId },
+        data: { status: 'failed' },
+      });
     }
+  }
+
+  // 생성 요청 상태 조회 (폴링용)
+  async getGenerationStatus(userId: string, requestId: string) {
+    const request = await this.prisma.sermonRequest.findUnique({
+      where: { id: requestId },
+      include: { draft: true },
+    });
+    if (!request) throw new NotFoundException('요청을 찾을 수 없습니다');
+
+    // 권한 체크
+    const membership = await this.prisma.membership.findFirst({
+      where: { userId, status: 'active' },
+    });
+    if (!membership || request.churchId !== membership.churchId) {
+      throw new ForbiddenException('접근 권한이 없습니다');
+    }
+
+    return {
+      status: request.status, // 'generating' | 'completed' | 'failed'
+      sermonId: request.draft?.id || null,
+    };
   }
 
   // ── 조회 ──

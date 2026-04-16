@@ -58,6 +58,12 @@ export class SermonController {
     }
   }
 
+  @Get('generate/status/:requestId')
+  @UseGuards(JwtAuthGuard)
+  async getGenerationStatus(@Request() req: any, @Param('requestId') requestId: string) {
+    return this.sermonService.getGenerationStatus(req.user.sub, requestId);
+  }
+
   @Post('analyze')
   @UseGuards(JwtAuthGuard)
   async analyze(@Body() dto: AnalyzeSermonDto) {
