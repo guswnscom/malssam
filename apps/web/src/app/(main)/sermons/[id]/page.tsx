@@ -47,6 +47,7 @@ export default function SermonDetailPage() {
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | ''>('');
   const [previousSermon, setPreviousSermon] = useState<SermonData | null>(null);
   const [revertLabel, setRevertLabel] = useState<string>(''); // 어떤 작업의 되돌리기인지 표시
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const sid = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
 
@@ -304,35 +305,64 @@ ${slideStructure}
     } catch {}
   };
 
-  const handleShare = async () => {
+  const getShareText = () => {
+    if (!sermon) return '';
+    return `[${WL[sermon.worshipType] || sermon.worshipType}] ${sermon.title}\n📖 ${sermon.scripture}\n📅 ${dateStr}\n\n${sermon.summary}`;
+  };
+
+  // 공유 버튼: 모달 열기
+  const handleShare = () => {
     if (!sermon) return;
-    const shareText = `[${WL[sermon.worshipType] || sermon.worshipType}] ${sermon.title}\n📖 ${sermon.scripture}\n📅 ${dateStr}\n\n${sermon.summary}`;
+    setShowShareModal(true);
+  };
 
-    // Web Share API 지원 시 (모바일)
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: sermon.title,
-          text: shareText,
-        });
-        return;
-      } catch {}
-    }
-
-    // 클립보드 복사 (PC)
+  // 텍스트 복사 (안정적인 fallback 포함)
+  const copyToClipboard = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(shareText);
-      toast('success', '설교 요약이 클립보드에 복사되었습니다');
-    } catch {
-      // fallback
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        toast('success', '클립보드에 복사되었습니다');
+        return;
+      }
+      // fallback: textarea 사용
       const ta = document.createElement('textarea');
-      ta.value = shareText;
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
       document.body.appendChild(ta);
+      ta.focus();
       ta.select();
-      document.execCommand('copy');
+      const success = document.execCommand('copy');
       document.body.removeChild(ta);
-      toast('success', '설교 요약이 클립보드에 복사되었습니다');
+      if (success) toast('success', '클립보드에 복사되었습니다');
+      else toast('error', '복사에 실패했습니다');
+    } catch {
+      toast('error', '복사에 실패했습니다');
     }
+  };
+
+  // 카카오톡/문자 등 OS 공유 (모바일)
+  const handleNativeShare = async () => {
+    const text = getShareText();
+    if (!navigator.share) {
+      toast('info', '이 브라우저는 공유 기능을 지원하지 않습니다');
+      return;
+    }
+    try {
+      await navigator.share({ title: sermon!.title, text });
+      setShowShareModal(false);
+    } catch (err: any) {
+      // 사용자 취소는 무시
+      if (err?.name !== 'AbortError') toast('error', '공유에 실패했습니다');
+    }
+  };
+
+  // 이메일로 공유
+  const handleEmailShare = () => {
+    const subject = encodeURIComponent(`[설교] ${sermon!.title}`);
+    const body = encodeURIComponent(getShareText());
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    setShowShareModal(false);
   };
 
   const handleSave = async () => {
@@ -658,6 +688,55 @@ ${slideStructure}
       </div>{/* max-w container end */}
 
       <PageHelp pageKey="sermonDetail" steps={HELP_DATA.sermonDetail} />
+
+      {/* 공유 모달 */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center px-4 pb-4 sm:pb-0 animate-fade-in" style={{ background: 'rgba(15,26,46,0.6)', backdropFilter: 'blur(4px)' }} onClick={() => setShowShareModal(false)}>
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 animate-slide-in-up" style={{ boxShadow: '0 16px 48px rgba(0,0,0,0.15)' }} onClick={e => e.stopPropagation()}>
+            <h3 className="font-bold text-lg text-[#0F1A2E] mb-1">설교 공유하기</h3>
+            <p className="text-xs text-gray-500 mb-4">{sermon.title}</p>
+
+            <div className="space-y-2 mb-3">
+              {/* 모바일: 카카오톡/문자 등 */}
+              {typeof navigator !== 'undefined' && 'share' in navigator && (
+                <button onClick={handleNativeShare} className="w-full flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#8B6914] text-white">
+                  <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className="font-bold text-sm">카카오톡, 문자로 보내기</p>
+                    <p className="text-[11px] text-white/80">설치된 앱으로 공유</p>
+                  </div>
+                </button>
+              )}
+
+              <button onClick={() => copyToClipboard(getShareText())} className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100">
+                <div className="w-9 h-9 bg-[#0F1A2E] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-[#C9A84C]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                </div>
+                <div className="text-left flex-1">
+                  <p className="font-bold text-sm text-[#0F1A2E]">설교 요약 복사</p>
+                  <p className="text-[11px] text-gray-500">제목, 본문, 요약을 클립보드에 복사</p>
+                </div>
+              </button>
+
+              <button onClick={handleEmailShare} className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100">
+                <div className="w-9 h-9 bg-[#0F1A2E] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-[#C9A84C]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </div>
+                <div className="text-left flex-1">
+                  <p className="font-bold text-sm text-[#0F1A2E]">이메일로 보내기</p>
+                  <p className="text-[11px] text-gray-500">기본 메일 앱 열기</p>
+                </div>
+              </button>
+            </div>
+
+            <button onClick={() => setShowShareModal(false)} className="btn-secondary w-full py-2.5 text-sm">
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
 
       {showDelete && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
