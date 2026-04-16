@@ -41,26 +41,32 @@ export class SermonService {
     const profile = church.profile!;
     const subscription = church.subscription!;
 
-    // 구독 상태 체크
-    if (subscription.status === 'expired' || subscription.status === 'suspended') {
-      throw new ForbiddenException('구독이 만료되었습니다. 결제를 진행해주세요.');
-    }
-    if (subscription.status === 'trial') {
-      const trialEnd = new Date(subscription.trialEnd);
-      if (new Date() > trialEnd) {
-        await this.prisma.subscription.update({ where: { id: subscription.id }, data: { status: 'expired' } });
-        throw new ForbiddenException('무료체험이 종료되었습니다. 구독을 시작해주세요.');
-      }
-    }
+    // ⚠️ 베타 테스트 모드 — 모든 사용량/구독 한도 체크 비활성화
+    // 정식 출시 시 BETA_MODE를 false로 변경하면 한도 체크 활성화됨
+    const BETA_MODE = true;
 
-    if (subscription.maxSermonsMonth > 0) {
-      const now = new Date();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const count = await this.prisma.sermonRequest.count({
-        where: { churchId: church.id, createdAt: { gte: monthStart } },
-      });
-      if (count >= subscription.maxSermonsMonth) {
-        throw new ForbiddenException(`이번 달 설교 생성 한도(${subscription.maxSermonsMonth}회)에 도달했습니다`);
+    if (!BETA_MODE) {
+      // 구독 상태 체크
+      if (subscription.status === 'expired' || subscription.status === 'suspended') {
+        throw new ForbiddenException('구독이 만료되었습니다. 결제를 진행해주세요.');
+      }
+      if (subscription.status === 'trial') {
+        const trialEnd = new Date(subscription.trialEnd);
+        if (new Date() > trialEnd) {
+          await this.prisma.subscription.update({ where: { id: subscription.id }, data: { status: 'expired' } });
+          throw new ForbiddenException('무료체험이 종료되었습니다. 구독을 시작해주세요.');
+        }
+      }
+
+      if (subscription.maxSermonsMonth > 0) {
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const count = await this.prisma.sermonRequest.count({
+          where: { churchId: church.id, createdAt: { gte: monthStart } },
+        });
+        if (count >= subscription.maxSermonsMonth) {
+          throw new ForbiddenException(`이번 달 설교 생성 한도(${subscription.maxSermonsMonth}회)에 도달했습니다`);
+        }
       }
     }
 
