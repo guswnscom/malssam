@@ -90,10 +90,10 @@ function NewSermonPage() {
     return true;
   };
 
-  // 폴링: 생성 완료까지 3초 간격으로 상태 확인
+  // 폴링: 생성 완료까지 5초 간격으로 상태 확인
   const pollGenerationStatus = async (requestId: string) => {
     const startTime = parseInt(localStorage.getItem('generatingStartedAt') || `${Date.now()}`);
-    const maxWait = 5 * 60 * 1000; // 최대 5분 대기
+    const maxWait = 10 * 60 * 1000; // 최대 10분 대기 (심층 모드 대응)
 
     const poll = async (): Promise<void> => {
       try {
@@ -111,26 +111,22 @@ function NewSermonPage() {
           setLoading(false);
           return;
         }
-        // 너무 오래 걸리면 중단
+        // 10분 초과: 백엔드는 계속 진행 중이지만 사용자에게 안내
         if (Date.now() - startTime > maxWait) {
-          localStorage.removeItem('generatingRequestId');
-          localStorage.removeItem('generatingStartedAt');
-          setError('생성에 시간이 너무 오래 걸리고 있습니다. 잠시 후 설교 목록에서 확인해주세요.');
+          // localStorage 유지 → 나중에 새 설교 페이지 다시 들어오면 폴링 재개
+          setError('__STILL_GENERATING__');
           setLoading(false);
           return;
         }
-        // 계속 폴링
-        setTimeout(poll, 3000);
-      } catch (err: any) {
-        // 일시적 네트워크 오류는 계속 시도
-        if (Date.now() - startTime > maxWait) {
-          localStorage.removeItem('generatingRequestId');
-          localStorage.removeItem('generatingStartedAt');
-          setError('네트워크 오류로 상태를 확인할 수 없습니다.');
-          setLoading(false);
-          return;
-        }
+        // 계속 폴링 (5초 간격)
         setTimeout(poll, 5000);
+      } catch (err: any) {
+        if (Date.now() - startTime > maxWait) {
+          setError('__STILL_GENERATING__');
+          setLoading(false);
+          return;
+        }
+        setTimeout(poll, 7000);
       }
     };
 
@@ -201,16 +197,19 @@ function NewSermonPage() {
 
   if (loading) {
     // 예상 시간: 30~90초, 프로그레스는 시간 기반 추정
-    const estimatedTotal = 60; // 평균 60초
+    // 심층 모드는 평균 3~5분 소요
+    const isDeep = form.depth === 'DEEP';
+    const estimatedTotal = isDeep ? 300 : 90;
     const progress = Math.min(95, Math.round((loadingSec / estimatedTotal) * 100));
 
     let statusMsg = '';
     let statusColor = 'text-gray-500';
     if (loadingSec < 15) { statusMsg = '본문을 분석하고 있습니다...'; }
     else if (loadingSec < 30) { statusMsg = '설교 구조를 설계하고 있습니다...'; }
-    else if (loadingSec < 60) { statusMsg = '심화된 내용을 교리에 맞게 검토하며 초안을 작성하고 있습니다...'; statusColor = 'text-blue-600'; }
-    else if (loadingSec < 120) { statusMsg = '깊이 있는 설교를 위해 더 자세히 검토 중입니다. 곧 완성됩니다...'; statusColor = 'text-amber-600'; }
-    else { statusMsg = '거의 완성되었습니다. 조금만 더 기다려주세요...'; statusColor = 'text-amber-600'; }
+    else if (loadingSec < 60) { statusMsg = '내용을 교리에 맞게 검토하며 초안을 작성하고 있습니다...'; statusColor = 'text-blue-600'; }
+    else if (loadingSec < 180) { statusMsg = '깊이 있는 설교를 위해 충분히 검토하고 있습니다...'; statusColor = 'text-amber-600'; }
+    else if (loadingSec < 360) { statusMsg = '풍성한 내용을 다듬고 있습니다. 조금만 더 기다려주세요...'; statusColor = 'text-amber-600'; }
+    else { statusMsg = '거의 완성되었습니다. 백그라운드에서 계속 진행 중입니다...'; statusColor = 'text-amber-600'; }
 
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
@@ -226,12 +225,20 @@ function NewSermonPage() {
           </div>
           <div className="flex justify-between text-xs text-gray-400 mb-4">
             <span>{progress}%</span>
-            <span>평균 30~60초 소요</span>
+            <span>{isDeep ? '심층: 평균 3~5분' : '평균 1~2분 소요'}</span>
           </div>
 
           <p className={`text-sm ${statusColor}`}>{statusMsg}</p>
 
           <p className="text-xs text-gray-400 mt-4">경과 시간: {loadingSec}초</p>
+
+          {/* 다른 작업 안내 — 백그라운드 처리 안심 */}
+          {loadingSec > 60 && (
+            <div className="mt-6 p-3 bg-[#0F1A2E]/5 border border-[#C9A84C]/20 rounded-xl text-xs text-gray-500">
+              💡 다른 앱으로 잠시 이동하셔도 괜찮습니다. <br/>
+              백그라운드에서 계속 생성되며, 돌아오시면 자동으로 완성된 설교를 보여드립니다.
+            </div>
+          )}
         </div>
       </div>
     );
@@ -428,11 +435,24 @@ function NewSermonPage() {
         )}
 
         {/* 에러 */}
-        {error && (
+        {error === '__STILL_GENERATING__' ? (
+          <div className="mt-4 p-5 bg-[#0F1A2E] rounded-2xl text-center">
+            <p className="text-[#C9A84C] font-bold mb-1">아직 생성 중입니다</p>
+            <p className="text-[#8B9DC3] text-sm mb-4">심층 모드는 시간이 더 걸릴 수 있습니다.<br/>설교 목록에서 완료 여부를 확인해주세요.</p>
+            <div className="flex gap-2 justify-center">
+              <button onClick={() => router.push('/sermons')} className="bg-gradient-to-r from-[#C9A84C] to-[#8B6914] text-white px-6 py-2.5 rounded-xl font-bold text-sm">
+                설교 목록 보기
+              </button>
+              <button onClick={() => router.push('/home')} className="bg-white text-gray-700 border border-gray-200 px-6 py-2.5 rounded-xl font-medium text-sm">
+                홈
+              </button>
+            </div>
+          </div>
+        ) : error ? (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error}
           </div>
-        )}
+        ) : null}
 
         {/* 하단 버튼 */}
         <div className="flex gap-3 mt-8">
