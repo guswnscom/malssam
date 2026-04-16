@@ -278,7 +278,17 @@ export class SermonService {
   @media print {
     body { margin: 0; }
     .no-print { display: none !important; }
-    @page { size: A4; margin: 20mm 18mm 20mm 18mm; }
+    @page {
+      size: A4;
+      margin: 20mm 18mm 20mm 18mm;
+      /* 브라우저 머리말/꼬리말(URL, 페이지번호) 제거 */
+      @top-left { content: ""; }
+      @top-center { content: ""; }
+      @top-right { content: ""; }
+      @bottom-left { content: ""; }
+      @bottom-center { content: ""; }
+      @bottom-right { content: ""; }
+    }
   }
   @media screen {
     body { max-width: 210mm; margin: 0 auto; padding: 20mm 18mm; background: #f9fafb; }
@@ -349,6 +359,10 @@ export class SermonService {
 
 </div>
 
+<div class="no-print" style="position: fixed; bottom: 80px; right: 24px; background: rgba(15,26,46,0.95); color: #C9A84C; padding: 10px 14px; border-radius: 10px; font-size: 12px; max-width: 220px; z-index: 99;">
+  💡 인쇄 시 URL/페이지번호가 보인다면<br/>
+  <strong>"옵션 더보기 → 머리말과 바닥글 해제"</strong>
+</div>
 <button class="print-btn no-print" onclick="window.print()">PDF 저장 / 인쇄</button>
 </body>
 </html>`;
