@@ -45,6 +45,8 @@ export default function SermonDetailPage() {
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | ''>('');
+  const [previousSermon, setPreviousSermon] = useState<SermonData | null>(null);
+  const [revertLabel, setRevertLabel] = useState<string>(''); // 어떤 작업의 되돌리기인지 표시
 
   const sid = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
 
@@ -123,16 +125,20 @@ export default function SermonDetailPage() {
 
   const handleRegen = async () => {
     if (!sermon || !regenFeedback.trim() || reviewLoading) return;
+    const before = { ...sermon }; // 되돌리기용 백업
     setRegenLoading(true);
     try {
       const r = await api.post(`/sermons/${sermon.id}/regenerate`, { feedback: regenFeedback, targetSection: regenSection });
       setSermon(r.data); setRegenFeedback(''); setRegenOpen(false);
+      setPreviousSermon(before);
+      setRevertLabel('AI 수정 요청');
     } catch (e: any) { toast('error', e?.response?.data?.message || '재생성에 실패했습니다'); }
     finally { setRegenLoading(false); }
   };
 
   const handleEnrich = async (idx: number) => {
     if (!sermon) return;
+    const before = { ...sermon }; // 되돌리기용 백업
     const key = `outline_${idx}`;
     setEnrichLoading(key);
     setEnrichSec(0);
@@ -144,8 +150,31 @@ export default function SermonDetailPage() {
         targetSection: `OUTLINE_${idx + 1}`,
       });
       setSermon(r.data);
+      setPreviousSermon(before);
+      setRevertLabel(`대지 ${idx + 1} 예화 추가`);
     } catch (e: any) { toast('error', e?.response?.data?.message || '예화 추가에 실패했습니다'); }
     finally { clearInterval(timer); setEnrichLoading(''); setEnrichSec(0); }
+  };
+
+  // 되돌리기: 이전 버전을 서버에 저장 + 화면 갱신
+  const handleRevert = async () => {
+    if (!previousSermon) return;
+    const ok = await confirm({ title: '이전 버전으로 되돌리기', message: `"${revertLabel}" 직전 상태로 되돌립니다. 계속하시겠습니까?`, confirmText: '되돌리기' });
+    if (!ok) return;
+    try {
+      const r = await api.put(`/sermons/${previousSermon.id}`, {
+        title: previousSermon.title,
+        summary: previousSermon.summary,
+        introduction: previousSermon.introduction,
+        outline: previousSermon.outline,
+        application: previousSermon.application,
+        conclusion: previousSermon.conclusion,
+      });
+      setSermon(r.data);
+      setPreviousSermon(null);
+      setRevertLabel('');
+      toast('success', '이전 버전으로 되돌렸습니다');
+    } catch { toast('error', '되돌리기에 실패했습니다'); }
   };
 
   const handlePptPrompt = () => {
@@ -316,6 +345,9 @@ ${slideStructure}
       toast('success', '저장되었습니다');
       localStorage.removeItem(`sermon_draft_${sermon.id}`);
       setAutoSaveStatus('saved');
+      // 명시적으로 저장했으니 되돌리기 백업 정리
+      setPreviousSermon(null);
+      setRevertLabel('');
     } catch { toast('error', '저장에 실패했습니다'); }
     finally { setSaving(false); }
   };
@@ -459,6 +491,19 @@ ${slideStructure}
           {/* ═══ 우측: 액션 패널 (데스크톱에서 sticky) ═══ */}
           <aside className="lg:w-[280px] lg:flex-shrink-0 mt-6 lg:mt-0">
             <div className="lg:sticky lg:top-16 space-y-4">
+
+        {/* 되돌리기 (이전 버전이 있을 때만 표시) */}
+        {previousSermon && (
+          <div className="card p-4 border-[#C9A84C]/30 bg-[#FFF8E7]">
+            <p className="text-xs text-[#8B6914] mb-2">
+              <span className="font-bold">{revertLabel}</span> 결과가 마음에 들지 않으시면
+            </p>
+            <button onClick={handleRevert} className="btn-secondary w-full py-2.5 text-sm flex items-center justify-center gap-1.5">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+              이전 버전으로 되돌리기
+            </button>
+          </div>
+        )}
 
         {/* ── 저장 ── */}
         <div className="card p-4">
