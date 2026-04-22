@@ -42,29 +42,71 @@ export default function SermonAnalyzePage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setError('');
+
+    // 파일 크기 체크 (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError('파일 크기는 10MB를 초과할 수 없습니다.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    // 지원 형식 사전 체크 (클라이언트측)
+    const name = file.name.toLowerCase();
+    const supported = ['.txt', '.pdf', '.docx'];
+    const unsupported = ['.doc', '.hwp', '.hwpx'];
+    const hasSupported = supported.some(ext => name.endsWith(ext));
+    const hasUnsupported = unsupported.some(ext => name.endsWith(ext));
+
+    if (hasUnsupported) {
+      if (name.endsWith('.doc')) {
+        setError('Word 97-2003(.doc)은 지원되지 않습니다. Word에서 "다른 이름으로 저장 → .docx"로 변환 후 업로드해주세요.');
+      } else if (name.endsWith('.hwp') || name.endsWith('.hwpx')) {
+        setError('한글 파일(.hwp)은 지원되지 않습니다. 한글에서 PDF로 저장하거나 본문을 복사하여 붙여넣어 주세요.');
+      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    if (!hasSupported) {
+      setError('지원되는 형식: TXT, PDF, Word(.docx) 파일만 업로드 가능합니다.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
     setUploading(true);
     setUploadedFileName(file.name);
 
     // TXT는 클라이언트에서 직접 처리
-    if (file.name.endsWith('.txt') || file.type === 'text/plain') {
-      setText(await file.text());
-      setUploading(false);
+    if (name.endsWith('.txt')) {
+      try {
+        const content = await file.text();
+        setText(content);
+        toast('success', '파일이 업로드되었습니다');
+      } catch {
+        setError('텍스트 파일을 읽을 수 없습니다.');
+        setUploadedFileName('');
+      } finally {
+        setUploading(false);
+      }
       return;
     }
 
-    // PDF, Word, 한글 등은 서버에서 파싱
+    // PDF, DOCX는 서버에서 파싱
     try {
       const formData = new FormData();
       formData.append('file', file);
       const { data } = await api.post('/sermons/analyze/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 60000, // 파일 업로드는 60초 타임아웃
       });
       setText(data.text);
+      toast('success', `파일이 업로드되었습니다 (${data.text.length}자)`);
     } catch (err: any) {
-      setError(err.response?.data?.message || '파일 처리에 실패했습니다');
+      setError(err.response?.data?.message || '파일 처리에 실패했습니다. 본문을 복사하여 붙여넣어 주세요.');
       setUploadedFileName('');
     } finally {
       setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -132,20 +174,24 @@ export default function SermonAnalyzePage() {
         {!improvedSermon && (
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 sm:p-6 mb-6">
             <h2 className="font-semibold text-gray-900 mb-1">설교문 입력</h2>
-            <p className="text-sm text-gray-500 mb-4">설교 원고를 붙여넣거나 파일을 업로드하세요 (PDF, Word, 텍스트 지원)</p>
+            <p className="text-sm text-gray-500 mb-4">설교 원고를 붙여넣거나 파일을 업로드하세요</p>
 
-            <div className="flex gap-2 mb-3">
+            <div className="flex flex-wrap gap-2 mb-2 items-center">
               <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
                 className="text-sm text-blue-600 hover:text-blue-800 font-medium px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50">
                 {uploading ? '📄 업로드 중...' : '📄 파일 업로드'}
               </button>
               <input ref={fileInputRef} type="file"
-                accept=".txt,.pdf,.docx,.doc,.hwp,.hwpx,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
+                accept=".txt,.pdf,.docx,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 onChange={handleFileUpload} className="hidden" />
               {uploadedFileName && (
                 <span className="text-xs text-green-600 self-center">✓ {uploadedFileName}</span>
               )}
             </div>
+            <p className="text-xs text-gray-400 mb-3">
+              지원 형식: <span className="font-semibold">TXT, PDF, Word(.docx)</span> · 최대 10MB<br/>
+              <span className="text-[11px]">※ 한글(.hwp), 구버전 Word(.doc), 스캔된 이미지 PDF는 지원되지 않습니다</span>
+            </p>
 
             <textarea value={text} onChange={(e) => setText(e.target.value)}
               placeholder="설교문 전체를 여기에 붙여넣으세요 (최소 100자)"
